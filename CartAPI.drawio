@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2021-08-23T09:20:20.351Z" agent="5.0 (X11)" etag="V9PCcDEsla0-owkGUJj7" version="14.9.8" type="github">
+<mxfile host="app.diagrams.net" modified="2021-08-23T09:26:26.056Z" agent="5.0 (X11)" etag="Ql-IrmDTyK1sptyzm8xD" version="14.9.8" type="github">
   <diagram id="5fFgp1cHh4VwXKB1_imK" name="Page-1">
     <mxGraphModel dx="1162" dy="627" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -38,7 +38,7 @@
           <mxGeometry y="78" width="140" height="26" as="geometry" />
         </mxCell>
         <mxCell id="ql77PT8SmIbXVKm26KD9-13" value="Item" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
-          <mxGeometry x="640" y="200" width="140" height="130" as="geometry" />
+          <mxGeometry x="640" y="200" width="140" height="182" as="geometry" />
         </mxCell>
         <mxCell id="ql77PT8SmIbXVKm26KD9-14" value="+ id: uuid" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="ql77PT8SmIbXVKm26KD9-13">
           <mxGeometry y="26" width="140" height="26" as="geometry" />
@@ -49,8 +49,14 @@
         <mxCell id="ql77PT8SmIbXVKm26KD9-18" value="+ brand: varchar" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="ql77PT8SmIbXVKm26KD9-13">
           <mxGeometry y="78" width="140" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="ql77PT8SmIbXVKm26KD9-26" value="+ number: int" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="ql77PT8SmIbXVKm26KD9-13">
+        <mxCell id="ql77PT8SmIbXVKm26KD9-26" value="+ year: varchar" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="ql77PT8SmIbXVKm26KD9-13">
           <mxGeometry y="104" width="140" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ql77PT8SmIbXVKm26KD9-27" value="+ model: varchar" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="ql77PT8SmIbXVKm26KD9-13">
+          <mxGeometry y="130" width="140" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="ql77PT8SmIbXVKm26KD9-28" value="+ number: int" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="ql77PT8SmIbXVKm26KD9-13">
+          <mxGeometry y="156" width="140" height="26" as="geometry" />
         </mxCell>
         <mxCell id="ql77PT8SmIbXVKm26KD9-21" value="" style="edgeStyle=entityRelationEdgeStyle;fontSize=12;html=1;endArrow=ERoneToMany;entryX=-0.002;entryY=0.736;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="ql77PT8SmIbXVKm26KD9-20" target="ql77PT8SmIbXVKm26KD9-14">
           <mxGeometry width="100" height="100" relative="1" as="geometry">
@@ -65,7 +71,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="ql77PT8SmIbXVKm26KD9-24" value="number - всего имеющихся item " style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
-          <mxGeometry x="510" y="356" width="190" height="24" as="geometry" />
+          <mxGeometry x="520" y="400" width="190" height="24" as="geometry" />
         </mxCell>
         <mxCell id="ql77PT8SmIbXVKm26KD9-25" value="numOfItems - количество добавленных пользователем item в корзину" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="280" y="230" width="190" height="50" as="geometry" />
