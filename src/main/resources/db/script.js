@@ -94,7 +94,26 @@ db.users.insertOne({
     "id" : "d32c3da0-0408-11ec-9a03-0242ac130003",
     "name": "Alex",
     "mail": "alexGr@gmail.com",
-    "password": "12345",
+    "password": "$2a$12$ukH5EN3vizXrqWFTZ1enQuOLljSA5IgVFafiuOe/knVZ8qxoOg5uG",
     "role": "user",
     "cart": "cb21c184-03fe-11ec-9a03-0242ac130003"
 })
+//password: user
+
+db.users.insertOne({
+    "id" : "ea3a5bec-04b9-11ec-9a03-0242ac130003",
+    "name": "Mary",
+    "mail": "maryCo@gmail.com",
+    "password": "$2a$12$GKnqF.p2f2iiw1WXNVWVuO6VmjgYy3dtSReAA3KgrQKH7v44YzB4a",
+    "role": "admin",
+})
+//password: admin
+
+db.users.find()
+
+db.users.deleteOne({
+    name: "Alex"
+})
+
+
+
