@@ -1,7 +1,8 @@
-package by.akimova.CartAPI.service;
+package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.repository.CartRepository;
+import by.akimova.CartAPI.service.CartService;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
