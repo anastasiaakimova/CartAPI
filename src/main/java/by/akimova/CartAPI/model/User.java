@@ -31,7 +31,7 @@ public class User {
     @Field(name = "password")
     private String password;
     @Field(name = "role")
-    private String role;
+    private Role role;
     @Field(name = "cartId")
     private Collection<Cart> carts;
 }
