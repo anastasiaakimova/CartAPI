@@ -43,7 +43,7 @@ public class CartServiceImpl implements CartService {
     public Cart deleteFromCart(UUID id, Cart cart) {
         Cart savedCart = cartRepository.findById(id);
         savedCart.getItems().remove(cart.getItems());
-        return savedCart;
+        return cartRepository.save(savedCart);
     }
 
     /**
