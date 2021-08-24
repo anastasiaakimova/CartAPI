@@ -1,20 +1,30 @@
 package by.akimova.CartAPI.config;
 
 import by.akimova.CartAPI.model.Role;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    private final UserDetailsService userDetailsService;
+
+    @Autowired
+    public SecurityConfig(@Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -23,11 +33,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/cart").hasRole(Role.USER.name())
                 .antMatchers("/users").hasRole(Role.ADMIN.name())
-                .antMatchers(HttpMethod.GET,"/items").permitAll()
                 .antMatchers(HttpMethod.POST, "/items").hasRole(Role.ADMIN.name())
                 .antMatchers(HttpMethod.DELETE, "/items").hasRole(Role.ADMIN.name())
                 .antMatchers(HttpMethod.PUT, "/items").hasRole(Role.ADMIN.name())
                 .antMatchers(HttpMethod.PATCH, "/items").hasRole(Role.ADMIN.name())
+                .antMatchers(HttpMethod.GET, "/items").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -35,16 +45,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     }
 
-    @Bean
     @Override
-    protected UserDetailsService userDetailsService(){
-        return new InMemoryUserDetailsManager(
-
-        );
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+           auth.authenticationProvider(daoAuthenticationProvider());
     }
 
     @Bean
     protected PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
+    }
+
+    @Bean
+    protected DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        return daoAuthenticationProvider;
     }
 }
