@@ -3,6 +3,7 @@ package by.akimova.CartAPI.service.impl;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -57,6 +58,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByMail(String mail) {
-        return userRepository.findByMail(mail);
+        return userRepository.findByMail(mail).orElseThrow(() ->
+                new UsernameNotFoundException("User doesn't exists"));
     }
 }

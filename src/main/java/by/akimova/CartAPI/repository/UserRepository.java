@@ -3,6 +3,7 @@ package by.akimova.CartAPI.repository;
 import by.akimova.CartAPI.model.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -17,5 +18,5 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     User findById(UUID id);
 
-    User findByMail(String mail);
+    Optional<User> findByMail(String mail);
 }
