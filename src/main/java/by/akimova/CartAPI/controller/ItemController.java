@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,7 +30,7 @@ public class ItemController {
      * @return response with body of items and status ok.
      */
     @GetMapping
-    public ResponseEntity getAllItems() {
+    public ResponseEntity<List<Item>> getAllItems() {
         return ResponseEntity.ok(itemService.getAllItems());
     }
 
@@ -40,8 +41,9 @@ public class ItemController {
      * @return response with body of item and status ok.
      */
     @GetMapping("/{id}")
-    public ResponseEntity showItem(@PathVariable(value = "id") UUID id) {
-        return ResponseEntity.ok(itemService.showItem(id));
+    public ResponseEntity<?> showItem(@PathVariable(value = "id") UUID id) {
+        Item item = itemService.showItem(id);
+        return ResponseEntity.ok(item);
     }
 
     /**
@@ -51,7 +53,7 @@ public class ItemController {
      * @return response with body of created item and status ok.
      */
     @PostMapping
-    public ResponseEntity addItem(@RequestBody Item item) {
+    public ResponseEntity<?> addItem(@RequestBody Item item) {
         itemService.saveItem(item);
         return new ResponseEntity<>(item, HttpStatus.CREATED);
     }
@@ -64,7 +66,7 @@ public class ItemController {
      * @return response with body of updated item and status ok.
      */
     @PutMapping("/{id}")
-    public ResponseEntity updateItem(@PathVariable(value = "id") UUID id, @RequestBody Item item) {
+    public ResponseEntity<?> updateItem(@PathVariable(value = "id") UUID id, @RequestBody Item item) {
         itemService.updateItem(id, item);
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
@@ -76,7 +78,7 @@ public class ItemController {
      * @return response status no_content.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteItem(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<?> deleteItem(@PathVariable(value = "id") UUID id) {
         itemService.deleteItemById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
