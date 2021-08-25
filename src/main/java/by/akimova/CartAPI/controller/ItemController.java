@@ -1,6 +1,5 @@
 package by.akimova.CartAPI.controller;
 
-import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
 import org.springframework.http.HttpStatus;
@@ -22,6 +21,16 @@ public class ItemController {
 
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
+    }
+
+    /**
+     * The method show items.
+     *
+     * @return response with body of items and status ok.
+     */
+    @GetMapping
+    public ResponseEntity getAllItems() {
+        return ResponseEntity.ok(itemService.getAllItems());
     }
 
     /**
@@ -71,6 +80,5 @@ public class ItemController {
         itemService.deleteItemById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
 
 }

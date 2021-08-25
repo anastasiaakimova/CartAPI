@@ -5,6 +5,7 @@ import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.ItemService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,6 +21,16 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemServiceImpl(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
+    }
+
+    /**
+     * The method show all items with all information about it.
+     *
+     * @return all items.
+     */
+    @Override
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
     }
 
     /**
