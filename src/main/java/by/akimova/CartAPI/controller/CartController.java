@@ -30,8 +30,9 @@ public class CartController {
      * @return response with body of cart and status ok.
      */
     @GetMapping("/{id}")
-    public ResponseEntity showCart(@PathVariable(value = "id") UUID id) {
-        return ResponseEntity.ok(cartService.showCart(id));
+    public ResponseEntity<?> showCart(@PathVariable(value = "id") UUID id) {
+        Cart cart = cartService.showCart(id);
+        return ResponseEntity.ok(cart);
     }
 
     /**
@@ -41,7 +42,7 @@ public class CartController {
      * @return response with body of created cart and status ok.
      */
     @PostMapping
-    public ResponseEntity addCart(@RequestBody Cart cart) {
+    public ResponseEntity<?> addCart(@RequestBody Cart cart) {
         cartService.saveCart(cart);
         return new ResponseEntity<>(cart, HttpStatus.CREATED);
     }
@@ -54,7 +55,7 @@ public class CartController {
      * @return response with body of updated cart and status ok.
      */
     @PutMapping("/{id}")
-    public ResponseEntity updateCart(@PathVariable(value = "id") UUID id, @RequestBody Cart cart) {
+    public ResponseEntity<?> updateCart(@PathVariable(value = "id") UUID id, @RequestBody Cart cart) {
         cartService.updateCart(id, cart);
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
@@ -66,7 +67,7 @@ public class CartController {
      * @return response status no_content.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteCart(@PathVariable(value = "id") UUID id) {
+    public ResponseEntity<?> deleteCart(@PathVariable(value = "id") UUID id) {
         cartService.deleteCartById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -79,7 +80,7 @@ public class CartController {
      * @return response status ok and message "updated".
      */
     @PatchMapping("/{id}")
-    public ResponseEntity deleteFromCart(@PathVariable(value = "id") UUID id, Cart cart) {
+    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "id") UUID id, Cart cart) {
         cartService.deleteFromCart(id, cart);
         return ResponseEntity.ok("updated");
     }
