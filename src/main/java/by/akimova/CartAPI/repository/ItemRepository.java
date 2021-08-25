@@ -7,4 +7,7 @@ import java.util.UUID;
 
 public interface ItemRepository extends MongoRepository<Item, String> {
     void deleteById(UUID id);
+
+    Item findById(UUID id);
+
 }
