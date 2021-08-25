@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -38,6 +39,12 @@ public class UserController {
     @GetMapping
     ResponseEntity<List<User>> showAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<?> findUserById(@PathVariable(value = "id") UUID id) {
+        User user = userService.findById(id);
+        return ResponseEntity.ok(user);
     }
 
 }
