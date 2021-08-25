@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.config;
 
+import by.akimova.CartAPI.model.Permission;
 import by.akimova.CartAPI.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,11 +33,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/cart").hasRole(Role.USER.name())
-                .antMatchers("/users").hasRole(Role.ADMIN.name())
-                .antMatchers(HttpMethod.POST, "/items").hasRole(Role.ADMIN.name())
-                .antMatchers(HttpMethod.DELETE, "/items").hasRole(Role.ADMIN.name())
-                .antMatchers(HttpMethod.PUT, "/items").hasRole(Role.ADMIN.name())
-                .antMatchers(HttpMethod.PATCH, "/items").hasRole(Role.ADMIN.name())
+                .antMatchers("/users").hasAuthority(Permission.USER_WRITE.getPermission())
+                .antMatchers(HttpMethod.POST, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
+                .antMatchers(HttpMethod.DELETE, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
+                .antMatchers(HttpMethod.PUT, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
+                .antMatchers(HttpMethod.PATCH, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
                 .antMatchers(HttpMethod.GET, "/items").permitAll()
                 .anyRequest()
                 .authenticated()
