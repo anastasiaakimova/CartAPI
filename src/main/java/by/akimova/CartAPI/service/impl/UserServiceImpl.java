@@ -54,4 +54,9 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(UUID id) {
         userRepository.deleteById(id);
     }
+
+    @Override
+    public User findByMail(String mail) {
+        return userRepository.findByMail(mail);
+    }
 }
