@@ -1,4 +1,4 @@
-package by.akimova.CartAPI.security;
+package by.akimova.CartAPI.security.jwt;
 
 import by.akimova.CartAPI.model.User;
 import lombok.Data;
