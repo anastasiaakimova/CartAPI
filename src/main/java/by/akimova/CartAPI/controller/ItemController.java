@@ -4,6 +4,7 @@ import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -53,6 +54,7 @@ public class ItemController {
      * @return response with body of created item and status ok.
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> addItem(@RequestBody Item item) {
         itemService.saveItem(item);
         return new ResponseEntity<>(item, HttpStatus.CREATED);
@@ -66,6 +68,7 @@ public class ItemController {
      * @return response with body of updated item and status ok.
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> updateItem(@PathVariable(value = "id") UUID id, @RequestBody Item item) {
         itemService.updateItem(id, item);
         return new ResponseEntity<>(item, HttpStatus.OK);
@@ -78,6 +81,7 @@ public class ItemController {
      * @return response status no_content.
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> deleteItem(@PathVariable(value = "id") UUID id) {
         itemService.deleteItemById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

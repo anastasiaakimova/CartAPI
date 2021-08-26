@@ -1,12 +1,12 @@
 package by.akimova.CartAPI.config;
 
-import by.akimova.CartAPI.model.Permission;
-import by.akimova.CartAPI.model.Role;
+import by.akimova.CartAPI.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import by.akimova.CartAPI.security.JwtConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtConfigurer jwtConfigurer;
 
@@ -31,13 +32,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth/login").permitAll()
-                .antMatchers("/carts").hasRole(Role.USER.name())
-                .antMatchers("/users").hasAuthority(Permission.USER_WRITE.getPermission())
-                .antMatchers(HttpMethod.POST, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
-                .antMatchers(HttpMethod.DELETE, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
-                .antMatchers(HttpMethod.PUT, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
-                .antMatchers(HttpMethod.PATCH, "/items").hasAuthority(Permission.USER_WRITE.getPermission())
-                .antMatchers(HttpMethod.GET, "/items").permitAll()
+                .antMatchers("/carts/**").permitAll()
+                // TODO: МОЖЕТ ЛИ У АДМИНА БЫТЬ СВОЯ КОРЗИНА??????
+                .antMatchers(HttpMethod.GET, "/items/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
