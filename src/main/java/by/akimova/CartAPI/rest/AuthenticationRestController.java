@@ -1,8 +1,10 @@
-package by.akimova.CartAPI.controller;
+package by.akimova.CartAPI.rest;
 
+import by.akimova.CartAPI.controller.AuthenticationRequestDTO;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.security.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +30,7 @@ public class AuthenticationRestController {
     private UserRepository userRepository;
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
     public AuthenticationRestController(AuthenticationManager authenticationManager, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
