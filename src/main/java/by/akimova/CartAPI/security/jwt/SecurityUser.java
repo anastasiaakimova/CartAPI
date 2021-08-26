@@ -15,13 +15,19 @@ public class SecurityUser implements UserDetails {
     private final String username;
     private final String password;
     private final List<SimpleGrantedAuthority> authorities;
-    private final boolean isActive;
+    private final boolean isEnabled;
+    private final boolean isAccountNonExpired;
+    private final boolean isAccountNonLocked;
+    private final boolean isCredentialsNonExpired;
 
-    public SecurityUser(String username, String password, List<SimpleGrantedAuthority> authorities, boolean isActive) {
+    public SecurityUser(String username, String password, List<SimpleGrantedAuthority> authorities, boolean isActive, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired) {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
-        this.isActive = isActive;
+        this.isEnabled = isActive;
+        this.isAccountNonExpired = isAccountNonExpired;
+        this.isAccountNonLocked = isAccountNonLocked;
+        this.isCredentialsNonExpired = isCredentialsNonExpired;
     }
 
     @Override
@@ -41,22 +47,22 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return isActive;
+        return isCredentialsNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return isActive;
+        return isAccountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return isActive;
+        return isAccountNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return isActive;
+        return isEnabled;
     }
 
     public static UserDetails fromUser(User user) {
