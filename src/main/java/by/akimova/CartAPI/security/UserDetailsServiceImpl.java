@@ -2,7 +2,9 @@ package by.akimova.CartAPI.security;
 
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
+import by.akimova.CartAPI.security.jwt.SecurityUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Autowired
-    public UserDetailsServiceImpl(UserRepository userRepository) {
+    public UserDetailsServiceImpl(@Qualifier("userRepository") UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
