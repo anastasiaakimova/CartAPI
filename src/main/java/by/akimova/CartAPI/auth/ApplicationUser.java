@@ -1,38 +1,40 @@
-package by.akimova.CartAPI.security.jwt;
+package by.akimova.CartAPI.auth;
 
-import by.akimova.CartAPI.model.User;
-import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 
-@Data
-public class SecurityUser implements UserDetails {
+public class ApplicationUser implements UserDetails {
 
-    private final String username;
+    private final List<? extends GrantedAuthority> grantedAuthorities;
     private final String password;
-    private final List<SimpleGrantedAuthority> authorities;
-    private final boolean isEnabled;
+    private final String userName;
     private final boolean isAccountNonExpired;
     private final boolean isAccountNonLocked;
     private final boolean isCredentialsNonExpired;
+    private final boolean isEnabled;
 
-    public SecurityUser(String username, String password, List<SimpleGrantedAuthority> authorities, boolean isActive, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired) {
-        this.username = username;
+    public ApplicationUser(List<? extends GrantedAuthority> grantedAuthorities,
+                           String password,
+                           String userName,
+                           boolean isAccountNonExpired,
+                           boolean isAccountNonLocked,
+                           boolean isCredentialsNonExpired,
+                           boolean isEnabled) {
+        this.grantedAuthorities = grantedAuthorities;
         this.password = password;
-        this.authorities = authorities;
-        this.isEnabled = isActive;
+        this.userName = userName;
         this.isAccountNonExpired = isAccountNonExpired;
         this.isAccountNonLocked = isAccountNonLocked;
         this.isCredentialsNonExpired = isCredentialsNonExpired;
+        this.isEnabled = isEnabled;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return grantedAuthorities;
     }
 
     @Override
@@ -42,12 +44,12 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return userName;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return isCredentialsNonExpired;
+        return isAccountNonExpired;
     }
 
     @Override
@@ -57,17 +59,11 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return isAccountNonExpired;
+        return isCredentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
         return isEnabled;
-    }
-
-    public static UserDetails fromUser(User user) {
-        return new org.springframework.security.core.userdetails.User(
-                user.getMail(), user.getPassword(),
-                user.getRole().getAuthorities());
     }
 }

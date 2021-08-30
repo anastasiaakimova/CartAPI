@@ -1,7 +1,6 @@
 package by.akimova.CartAPI.config;
 
-import by.akimova.CartAPI.jwt.JwtUsernameAndPasswordAuthenticationFilter;
-import by.akimova.CartAPI.security.JwtConfigurer;
+import by.akimova.CartAPI.first.security.JwtConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -31,7 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/auth/**").permitAll()
                 .antMatchers("/carts/**").permitAll()
                 // TODO: МОЖЕТ ЛИ У АДМИНА БЫТЬ СВОЯ КОРЗИНА??????
                 .antMatchers(HttpMethod.GET, "/items/**").permitAll()
@@ -50,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    protected PasswordEncoder passwordEncoder() {
+    protected BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
 
