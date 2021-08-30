@@ -1,9 +1,8 @@
 package by.akimova.CartAPI.config;
 
-import by.akimova.CartAPI.first.security.JwtConfigurer;
+import by.akimova.CartAPI.auth.filter.AuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,11 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtConfigurer jwtConfigurer;
-
-    public SecurityConfig(JwtConfigurer jwtConfigurer) {
-        this.jwtConfigurer = jwtConfigurer;
-    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -28,15 +22,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+              //  .authorizeRequests().antMatcher("/login").permitAll()
+              //  .and
                 .authorizeRequests()
-                .antMatchers("/auth/**").permitAll()
-                .antMatchers("/carts/**").permitAll()
-                // TODO: МОЖЕТ ЛИ У АДМИНА БЫТЬ СВОЯ КОРЗИНА??????
-                .antMatchers(HttpMethod.GET, "/items/**").permitAll()
-                .anyRequest()
-                .authenticated()
+                .anyRequest().permitAll()
                 .and()
-                .apply(jwtConfigurer);
+                .addFilter(new AuthenticationFilter(authenticationManagerBean()));
+
+
 
     }
 
