@@ -3,6 +3,7 @@ package by.akimova.CartAPI.config;
 import by.akimova.CartAPI.auth.filter.AuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,17 +19,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManagerBean());
+        authenticationFilter.setFilterProcessesUrl("/auth/login");
         http
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-              //  .authorizeRequests().antMatcher("/login").permitAll()
-              //  .and
                 .authorizeRequests()
-                .anyRequest().permitAll()
+                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/carts/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/items/**").permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .addFilter(new AuthenticationFilter(authenticationManagerBean()));
 
+
+   /*     csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests()
+                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/carts/**").permitAll()
+                // TODO: МОЖЕТ ЛИ У АДМИНА БЫТЬ СВОЯ КОРЗИНА??????
+                .antMatchers(HttpMethod.GET, "/items/**").permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .apply(jwtConfigurer);*/
 
 
     }
