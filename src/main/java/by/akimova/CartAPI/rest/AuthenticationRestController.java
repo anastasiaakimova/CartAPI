@@ -1,6 +1,6 @@
 package by.akimova.CartAPI.rest;
 
-import by.akimova.CartAPI.controller.AuthenticationRequestDTO;
+import by.akimova.CartAPI.controller.AuthenticationRequest;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.security.JwtTokenProvider;
@@ -38,7 +38,7 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequestDTO requestDTO) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest requestDTO) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(requestDTO.getMail(), requestDTO.getPassword()));
             User user = userRepository.findByMail(requestDTO.getMail()).orElseThrow(() -> new UsernameNotFoundException("User doesn't exists!"));
