@@ -4,20 +4,24 @@ import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * The class is implementation of user's business logic.
+ * Wrapper for {@link UserRepository} + business logic.
  *
  * @author anastasiyaakimava
  * @version 1.0
  */
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -35,6 +39,7 @@ public class UserServiceImpl implements UserService {
         user.setId(UUID.randomUUID());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(Role.USER);
+        log.info("IN register - user: {} successfully registered", user);
         return userRepository.save(user);
     }
 
@@ -45,7 +50,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        List<User> result = userRepository.findAll();
+        log.info("IN getAll - {} users found", result.size());
+
+        return result;
     }
 
     @Override
@@ -55,18 +63,20 @@ public class UserServiceImpl implements UserService {
         savedUser.setName(user.getName());
         savedUser.setMail(user.getMail());
         savedUser.setPassword(user.getPassword());
-
+        log.info("IN update - user with id: {} successfully updated", id);
         return userRepository.save(savedUser);
     }
 
     @Override
     public void deleteUserById(UUID id) {
         userRepository.deleteById(id);
+        log.info("IN delete - user with id: {} successfully deleted", id);
     }
 
     @Override
-    public User findByMail(String mail) {
-        return userRepository.findByMail(mail).orElseThrow(() ->
-                new UsernameNotFoundException("User doesn't exists"));
+    public Optional<User> findByMail(String mail) {
+        log.info("IN findByMail - user found by mail: {}", mail);
+        return Optional.ofNullable(userRepository.findByMail(mail).orElseThrow(() ->
+                new UsernameNotFoundException("User doesn't exists")));
     }
 }
