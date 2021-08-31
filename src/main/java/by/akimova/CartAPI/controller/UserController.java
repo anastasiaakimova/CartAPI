@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +26,19 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * The method add new user to database.
+     *
+     * @param user This is parameters of user.
+     * @return ResponseEntity with user and status created.
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
-        User savedUser = userService.findByMail(user.getMail());
+        User savedUser = userService.findByMail(user.getMail()).get();/*orElseThrow(
+                () -> new UsernameNotFoundException("User doesn't exists!")
+
+        );*/
         if (savedUser != null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -38,6 +48,11 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
+    /**
+     * The method shows admin all users.
+     *
+     * @return ResponseEntity with list of users and status ok.
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('user:write')")
     ResponseEntity<List<User>> showAllUsers() {

@@ -1,9 +1,9 @@
 package by.akimova.CartAPI.rest;
 
-import by.akimova.CartAPI.controller.AuthenticationRequest;
+import by.akimova.CartAPI.dto.AuthenticationRequest;
 import by.akimova.CartAPI.model.User;
-import by.akimova.CartAPI.repository.UserRepository;
-import by.akimova.CartAPI.security.JwtTokenProvider;
+import by.akimova.CartAPI.security.jwt.JwtTokenProvider;
+import by.akimova.CartAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,24 +27,31 @@ import java.util.Map;
 public class AuthenticationRestController {
 
     private final AuthenticationManager authenticationManager;
-    private UserRepository userRepository;
-    private JwtTokenProvider jwtTokenProvider;
+    private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public AuthenticationRestController(AuthenticationManager authenticationManager, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
+    public AuthenticationRestController(AuthenticationManager authenticationManager, UserService userService, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    /**
+     * This method for authentication login request.
+     *
+     * @param request request's parameters.
+     * @return ResponseEntity with mail and token.
+     */
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest requestDTO) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(requestDTO.getMail(), requestDTO.getPassword()));
-            User user = userRepository.findByMail(requestDTO.getMail()).orElseThrow(() -> new UsernameNotFoundException("User doesn't exists!"));
-            String token = jwtTokenProvider.createToken(requestDTO.getMail(), user.getRole().name());
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getMail(), request.getPassword()));
+            User user = userService.findByMail(request.getMail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User doesn't exists!"));
+            String token = jwtTokenProvider.createToken(request.getMail(), user.getRole().name());
             Map<Object, Object> response = new HashMap<>();
-            response.put("mail", requestDTO.getMail());
+            response.put("mail", request.getMail());
             response.put("token", token);
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
