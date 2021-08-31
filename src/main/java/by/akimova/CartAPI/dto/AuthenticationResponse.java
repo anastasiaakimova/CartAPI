@@ -1,4 +1,4 @@
-package by.akimova.CartAPI.controller;
+package by.akimova.CartAPI.dto;
 
 import lombok.Data;
 
