@@ -4,6 +4,7 @@ import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.User;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -25,6 +26,6 @@ public interface UserService {
 
     void deleteUserById(UUID id);
 
-    User findByMail(String mail);
+    Optional<User> findByMail(String mail);
 
 }

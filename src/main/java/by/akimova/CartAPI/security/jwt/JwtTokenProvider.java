@@ -15,10 +15,15 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
 
+/**
+ * Util class that provides methods for generation, validation, etc. of JWT token.
+ *
+ * @author anastasiyaakimava
+ * @version 1.0
+ */
 @Component
 public class JwtTokenProvider {
     private final UserDetailsService userDetailsService;
-
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -66,7 +71,8 @@ public class JwtTokenProvider {
     public String getName(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
-    public String resolveToken(HttpServletRequest request){
+
+    public String resolveToken(HttpServletRequest request) {
         return request.getHeader(authorizationHeader);
     }
 }
