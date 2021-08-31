@@ -1,4 +1,4 @@
-package by.akimova.CartAPI.security;
+package by.akimova.CartAPI.security.jwt;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

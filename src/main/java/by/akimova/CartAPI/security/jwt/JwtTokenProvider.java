@@ -1,5 +1,6 @@
-package by.akimova.CartAPI.security;
+package by.akimova.CartAPI.security.jwt;
 
+import by.akimova.CartAPI.security.jwt.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
