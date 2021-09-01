@@ -21,9 +21,9 @@ import java.util.UUID;
 public class User {
     @Id
     private ObjectId _id;
-    @Field(name = "id")
+    @Field(name = "userId")
     @Indexed(unique = true)
-    private UUID id;
+    private UUID userId;
     @Field(name = "name")
     private String name;
     @Field(name = "mail")

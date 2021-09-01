@@ -21,13 +21,12 @@ import java.util.UUID;
 @Data
 public class Cart {
     @Id
+    @Field(name = "_id")
     private ObjectId _id;
-    @Field(name = "id")
+    @Field(name = "cartId")
     @Indexed(unique = true)
-    private UUID id;
-    @Field(name = "numOfItems")
-    private String numOfItems;
-    @Field(name = "itemId")
+    private UUID cartId;
+    @Field(name = "item")
     private Collection<Item> items;
 
 }
