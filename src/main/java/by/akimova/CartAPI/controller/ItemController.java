@@ -16,7 +16,7 @@ import java.util.UUID;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/item")
+@RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
 
@@ -32,18 +32,6 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<Item>> getAllItems() {
         return ResponseEntity.ok(itemService.getAllItems());
-    }
-
-    /**
-     * The method show item.
-     *
-     * @param id This is item's id which should be viewed.
-     * @return response with body of item and status ok.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<?> showItem(@PathVariable(value = "id") UUID id) {
-        Item item = itemService.showItem(id);
-        return ResponseEntity.ok(item);
     }
 
     /**
