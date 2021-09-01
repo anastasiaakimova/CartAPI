@@ -13,7 +13,7 @@ import java.util.UUID;
  */
 
 public interface UserRepository extends MongoRepository<User, String> {
-    void deleteById(UUID id);
+    void deleteByUserId(UUID userId);
 
-    User findById(UUID id);
+    User findByUserId(UUID userId);
 }

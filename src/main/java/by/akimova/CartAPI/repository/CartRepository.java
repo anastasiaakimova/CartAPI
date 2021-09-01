@@ -2,6 +2,7 @@ package by.akimova.CartAPI.repository;
 
 import by.akimova.CartAPI.model.Cart;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
@@ -11,9 +12,10 @@ import java.util.UUID;
  * @author anastasiyaakimava
  * @version 1.0
  */
+@Repository("cartRepository")
 public interface CartRepository extends MongoRepository<Cart, String> {
-    void deleteById(UUID id);
+    void deleteByCartId(UUID cartId);
 
-    Cart findById(UUID id);
+    Cart findCartByCartId(UUID cartId);
 
 }

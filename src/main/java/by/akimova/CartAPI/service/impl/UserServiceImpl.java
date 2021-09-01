@@ -25,13 +25,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUser(User user) {
-        user.setId(UUID.randomUUID());
+        user.setUserId(UUID.randomUUID());
         return userRepository.save(user);
     }
 
     @Override
-    public User findById(UUID id) {
-        return userRepository.findById(id);
+    public User findById(UUID userId) {
+        return userRepository.findByUserId(userId);
     }
 
     @Override
@@ -40,8 +40,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(UUID id, User user) {
-        User savedUser = userRepository.findById(id);
+    public User updateUser(UUID userId, User user) {
+        User savedUser = userRepository.findByUserId(userId);
 
         savedUser.setName(user.getName());
         savedUser.setMail(user.getMail());
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(UUID id) {
-        userRepository.deleteById(id);
+    public void deleteUserById(UUID userId) {
+        userRepository.deleteByUserId(userId);
     }
 }
