@@ -11,7 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * The class is implementation of item's business logic.
+ * The class is implementation of  {@link ItemService} interface.
+ * Wrapper for {@link ItemRepository} + business logic.
  *
  * @author anastasiyaakimava
  * @version 1.0
@@ -29,11 +30,13 @@ public class ItemServiceImpl implements ItemService {
     /**
      * The method show all items with all information about it.
      *
-     * @return all items.
+     * @return list of items.
      */
     @Override
     public List<Item> getAllItems() {
-        return itemRepository.findAll();
+        List<Item> result = itemRepository.findAll();
+        log.info("IN getAll - {} items found", result.size());
+        return result;
     }
 
     /**
@@ -64,24 +67,30 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item saveItem(Item item) {
         item.setItemId(UUID.randomUUID());
+        log.info("IN saveItem - new item with id: {} successfully added", item.getItemId());
         return itemRepository.insert(item);
     }
 
     /**
      * This method update item.
      *
-     * @param itemId   This is item's id which needed to update.
-     * @param item This is updated item.
+     * @param itemId This is item's id which needed to update.
+     * @param item   This is updated item.
      * @return Updated item.
      */
     @Override
     public Item updateItem(UUID itemId, Item item) {
         Item savedItem = itemRepository.findItemByItemId(itemId);
 
+        if (savedItem == null) {
+            log.warn("IN updateItem - no item found by id: {}", itemId);
+            return null;
+        }
         savedItem.setName(item.getName());
         savedItem.setBrand(item.getBrand());
+        savedItem.setModel(item.getModel());
         savedItem.setYear(item.getYear());
-
+        log.info("IN updateItem - item with id: {} successfully edited ", itemId);
         return itemRepository.save(savedItem);
     }
 
@@ -93,5 +102,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void deleteItemById(UUID itemId) {
         itemRepository.deleteItemByItemId(itemId);
+        log.info("IN delete - item with id: {} successfully deleted", itemId);
     }
 }

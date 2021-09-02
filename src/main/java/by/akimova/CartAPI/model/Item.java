@@ -26,6 +26,8 @@ public class Item {
     private UUID itemId;
     @Field(name = "name")
     private String name;
+    @Field(name = "model")
+    private String model;
     @Field(name = "brand")
     private String brand;
     @Field(name = "year")
