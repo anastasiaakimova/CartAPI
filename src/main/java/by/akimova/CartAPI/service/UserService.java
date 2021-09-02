@@ -1,13 +1,12 @@
 package by.akimova.CartAPI.service;
 
-import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.User;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * The interface of business logic class
+ * Service interface for class {@link User}.
  *
  * @author anastasiyaakimava
  * @version 1.0
