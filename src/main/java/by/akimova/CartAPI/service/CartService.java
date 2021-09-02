@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The interface of business logic class
+ * Service interface for class {@link Cart}.
  *
  * @author anastasiyaakimava
  * @version 1.0
@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface CartService {
     List<Cart> getAll();
 
-    Cart showCart(UUID id);
+    Cart getCartById(UUID id);
 
     Cart deleteFromCart(UUID id, Cart cart);
 

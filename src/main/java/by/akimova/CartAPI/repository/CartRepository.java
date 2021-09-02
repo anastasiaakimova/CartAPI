@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 /**
- * Repository for Cart.
+ * Repository interface for class {@link Cart}.
  *
  * @author anastasiyaakimava
  * @version 1.0

@@ -1,13 +1,11 @@
 package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.model.Cart;
-import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +34,12 @@ public class CartController {
         return ResponseEntity.ok(cartService.getAll());
     }
 
+    @GetMapping("/{id}")
+    ResponseEntity<?> findCartById(@PathVariable(value = "id") UUID id) {
+        Cart cart = cartService.getCartById(id);
+        return ResponseEntity.ok(cart);
+    }
+
     /**
      * The method add new cart.
      *
@@ -51,8 +55,8 @@ public class CartController {
     /**
      * The method update cart.
      *
-     * @param cartId   This is cart's id which should be updated.
-     * @param cart This is new body for cart which should be updated.
+     * @param cartId This is cart's id which should be updated.
+     * @param cart   This is new body for cart which should be updated.
      * @return response with body of updated cart and status ok.
      */
     @PutMapping("/{cartId}")
@@ -76,13 +80,14 @@ public class CartController {
     /**
      * The method delete items from cart.
      *
-     * @param cartId   This is cart's id from items should be deleted.
-     * @param cart this is body with.
+     * @param cartId This is cart's id from items should be deleted.
+     * @param cart   this is body with.
      * @return response status ok and message "updated".
      */
-    @PatchMapping("/{cartId}")
-    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, Cart cart) {
+    @PutMapping("/delete/{cartId}")
+    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
+        Cart savedCart = cartService.getCartById(cartId);
         cartService.deleteFromCart(cartId, cart);
-        return ResponseEntity.ok("updated");
+        return new ResponseEntity<>("updated", HttpStatus.OK);
     }
 }

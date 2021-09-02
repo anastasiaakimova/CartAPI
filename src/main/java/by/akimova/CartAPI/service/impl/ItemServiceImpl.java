@@ -50,11 +50,11 @@ public class ItemServiceImpl implements ItemService {
         Item result = itemRepository.findItemByItemId(itemId);
 
         if (result == null) {
-            log.warn("IN findById - no item found by id: {}", itemId);
+            log.warn("IN findByCartId - no item found by id: {}", itemId);
             return null;
         }
 
-        log.info("IN findById - item: {} found by id: {}", result, itemId);
+        log.info("IN findCartById - item: {} found by id: {}", result, itemId);
         return result;
     }
 
