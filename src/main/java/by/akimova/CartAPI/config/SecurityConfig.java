@@ -38,9 +38,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth/login", "/carts/**").permitAll()
-                // TODO: МОЖЕТ ЛИ У АДМИНА БЫТЬ СВОЯ КОРЗИНА??????
+                .antMatchers("/auth/login").permitAll()
                 .antMatchers(HttpMethod.GET, "/items/**").permitAll()
+                .antMatchers(HttpMethod.PUT, "/users/**", "/carts/**").fullyAuthenticated()
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));

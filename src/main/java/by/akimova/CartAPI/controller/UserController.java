@@ -1,15 +1,12 @@
 package by.akimova.CartAPI.controller;
 
-import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +33,7 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-/*    /**
+    /*    /**
      * The method add new user to database.
      *
      * @param user This is parameters of user.
@@ -88,62 +85,64 @@ public class UserController {
 //            return new ResponseEntity<>(user, HttpStatus.OK);
 //        }
 
-        /**
-         * The method add new user.
-         *
-         * @param user This is item with its information and body.
-         * @return response with body of created user and status ok.
-         */
-        @PostMapping
-        public ResponseEntity<?> addUser (@RequestBody User user){
+    /**
+     * The method add new user.
+     *
+     * @param user This is item with its information and body.
+     * @return response with body of created user and status ok.
+     */
+    @PostMapping
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<?> addUser(@RequestBody User user) {
 
-            userService.saveUser(user);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
-        }
-
-        /**
-         * The method shows admin all users.
-         *
-         * @return ResponseEntity with list of users and status ok.
-         */
-        @GetMapping
-        @PreAuthorize("hasAuthority('user:write')")
-        ResponseEntity<List<User>> showAllUsers () {
-            return ResponseEntity.ok(userService.getAllUsers());
-        }
-
-        @GetMapping("/{id}")
-        @PreAuthorize("hasAuthority('user:write')")
-        ResponseEntity<?> findUserById (@PathVariable(value = "id") UUID id){
-            User user = userService.findById(id);
-            return ResponseEntity.ok(user);
-        }
-
-        /**
-         * The method update item.
-         *
-         * @param id   This is user's id which should be updated.
-         * @param user This is new body for user which should be updated.
-         * @return response with body of updated user and status ok.
-         */
-        @PutMapping("/{id}")
-        public ResponseEntity<?> updateUser (@PathVariable(value = "id") UUID id, @RequestBody User user){
-            userService.updateUser(id, user);
-            return new ResponseEntity<>(user, HttpStatus.OK);
-        }
-
-        /**
-         * The method delete user.
-         *
-         * @param id This is user's id which should be deleted.
-         * @return response status no_content.
-         */
-        @DeleteMapping("/{id}")
-        public ResponseEntity<?> deleteUser (@PathVariable(value = "id") UUID id){
-            userService.deleteUserById(id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-
-        }
-
-
+        userService.saveUser(user);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
+
+    /**
+     * The method shows admin all users.
+     *
+     * @return ResponseEntity with list of users and status ok.
+     */
+    @GetMapping
+    @PreAuthorize("hasAuthority('user:write')")
+    ResponseEntity<List<User>> showAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    ResponseEntity<?> findUserById(@PathVariable(value = "id") UUID id) {
+        User user = userService.findById(id);
+        return ResponseEntity.ok(user);
+    }
+
+
+//TODO: Может ли юзер сам себя апдейтить?
+
+    /**
+     * The method update item.
+     *
+     * @param id   This is user's id which should be updated.
+     * @param user This is new body for user which should be updated.
+     * @return response with body of updated user and status ok.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable(value = "id") UUID id, @RequestBody User user) {
+        userService.updateUser(id, user);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    /**
+     * The method delete user.
+     *
+     * @param id This is user's id which should be deleted.
+     * @return response status no_content.
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<?> deleteUser(@PathVariable(value = "id") UUID id) {
+        userService.deleteUserById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+}

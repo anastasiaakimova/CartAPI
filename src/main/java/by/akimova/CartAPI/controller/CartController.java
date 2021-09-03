@@ -4,6 +4,7 @@ import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,11 +31,13 @@ public class CartController {
      * @return response with body of carts and status ok.
      */
     @GetMapping
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<List<Cart>> getAllCarts() {
         return ResponseEntity.ok(cartService.getAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     ResponseEntity<?> findCartById(@PathVariable(value = "id") UUID id) {
         Cart cart = cartService.getCartById(id);
         return ResponseEntity.ok(cart);
@@ -47,6 +50,7 @@ public class CartController {
      * @return response with body of created cart and status ok.
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> addCart(@RequestBody Cart cart) {
         cartService.saveCart(cart);
         return new ResponseEntity<>(cart, HttpStatus.CREATED);
@@ -60,6 +64,7 @@ public class CartController {
      * @return response with body of updated cart and status ok.
      */
     @PutMapping("/{cartId}")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> updateCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
         cartService.updateCart(cartId, cart);
         return new ResponseEntity<>(cart, HttpStatus.OK);
@@ -72,6 +77,7 @@ public class CartController {
      * @return response status no_content.
      */
     @DeleteMapping("/{cartId}")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> deleteCart(@PathVariable(value = "cartId") UUID cartId) {
         cartService.deleteCartById(cartId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -85,6 +91,7 @@ public class CartController {
      * @return response status ok and message "updated".
      */
     @PutMapping("/delete/{cartId}")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
         Cart savedCart = cartService.getCartById(cartId);
         cartService.deleteFromCart(cartId, cart);

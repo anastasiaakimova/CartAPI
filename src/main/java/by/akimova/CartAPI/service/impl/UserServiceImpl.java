@@ -2,7 +2,6 @@ package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
-import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.CartRepository;
 import by.akimova.CartAPI.repository.ItemRepository;
@@ -55,7 +54,7 @@ public class UserServiceImpl implements UserService {
     public User saveUser(User user) {
         user.setUserId(UUID.randomUUID());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(Role.USER);
+        user.setRole(user.getRole());
         user.setCarts(user.getCarts());
         if (user.getCarts() != null) {
             for (Cart cart : user.getCarts()) {
@@ -129,7 +128,7 @@ public class UserServiceImpl implements UserService {
             user.setName(savedUser.getName());
             user.setMail(savedUser.getMail());
             user.setPassword(passwordEncoder.encode(savedUser.getPassword()));
-            user.setRole(Role.USER);
+            user.setRole(user.getRole());
             user.setCarts(savedUser.getCarts());
             if (user.getCarts() != null) {
                 for (Cart cart : user.getCarts()) {
@@ -170,10 +169,11 @@ public class UserServiceImpl implements UserService {
             log.warn("IN updateUser - no user found by id: {}", savedUser);
             return null;
         }
+
         savedUser.setName(user.getName());
         savedUser.setMail(user.getMail());
         savedUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        savedUser.setRole(Role.USER);
+        savedUser.setRole(user.getRole());
         savedUser.setCarts(user.getCarts());
         if (savedUser.getCarts() != null) {
             for (Cart cart : savedUser.getCarts()) {
