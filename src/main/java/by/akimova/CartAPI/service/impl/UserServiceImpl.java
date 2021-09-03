@@ -1,7 +1,11 @@
 package by.akimova.CartAPI.service.impl;
 
+import by.akimova.CartAPI.model.Cart;
+import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
+import by.akimova.CartAPI.repository.CartRepository;
+import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +32,15 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final CartRepository cartRepository;
+    private final ItemRepository itemRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, CartRepository cartRepository, ItemRepository itemRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.cartRepository = cartRepository;
+        this.itemRepository = itemRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -45,10 +53,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUser(User user) {
-
         user.setUserId(UUID.randomUUID());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(Role.USER);
+        user.setCarts(user.getCarts());
+        if (user.getCarts() != null) {
+            for (Cart cart : user.getCarts()) {
+                Cart savedCart = cartRepository.findCartByCartId(cart.getCartId());
+                cart.setCartId(savedCart.getCartId());
+                cart.set_id(savedCart.get_id());
+                cart.setItems(savedCart.getItems());
+                if (cart.getItems() != null) {
+                    for (Item item : cart.getItems()) {
+                        Item savedItem = itemRepository.findItemByItemId(item.getItemId());
+                        item.set_id(savedItem.get_id());
+                        item.setItemId(savedItem.getItemId());
+                        item.setName(savedItem.getName());
+                        item.setModel(savedItem.getModel());
+                        item.setBrand(savedItem.getBrand());
+                        item.setYear(savedItem.getYear());
+                    }
+                }
+            }
+        }
+
         log.info("IN saveUser - new user with id: {} successfully added", user.getUserId());
 
         return userRepository.save(user);
@@ -94,6 +122,35 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         List<User> users = userRepository.findAll();
+        for (User user : users) {
+            User savedUser = userRepository.findUserByUserId(user.getUserId());
+            user.setUserId(savedUser.getUserId());
+            user.set_id(savedUser.get_id());
+            user.setName(savedUser.getName());
+            user.setMail(savedUser.getMail());
+            user.setPassword(passwordEncoder.encode(savedUser.getPassword()));
+            user.setRole(Role.USER);
+            user.setCarts(savedUser.getCarts());
+            if (user.getCarts() != null) {
+                for (Cart cart : user.getCarts()) {
+                    Cart savedCart = cartRepository.findCartByCartId(cart.getCartId());
+                    cart.setCartId(savedCart.getCartId());
+                    cart.set_id(savedCart.get_id());
+                    cart.setItems(savedCart.getItems());
+                    if (cart.getItems() != null) {
+                        for (Item item : cart.getItems()) {
+                            Item savedItem = itemRepository.findItemByItemId(item.getItemId());
+                            item.set_id(savedItem.get_id());
+                            item.setItemId(savedItem.getItemId());
+                            item.setName(savedItem.getName());
+                            item.setModel(savedItem.getModel());
+                            item.setBrand(savedItem.getBrand());
+                            item.setYear(savedItem.getYear());
+                        }
+                    }
+                }
+            }
+        }
         log.info("IN getAllUsers - {} users found", users.size());
         return users;
     }
@@ -115,7 +172,28 @@ public class UserServiceImpl implements UserService {
         }
         savedUser.setName(user.getName());
         savedUser.setMail(user.getMail());
-        savedUser.setPassword(user.getPassword());
+        savedUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        savedUser.setRole(Role.USER);
+        savedUser.setCarts(user.getCarts());
+        if (savedUser.getCarts() != null) {
+            for (Cart cart : savedUser.getCarts()) {
+                Cart savedCart = cartRepository.findCartByCartId(cart.getCartId());
+                cart.setCartId(savedCart.getCartId());
+                cart.set_id(savedCart.get_id());
+                cart.setItems(savedCart.getItems());
+                if (cart.getItems() != null) {
+                    for (Item item : cart.getItems()) {
+                        Item savedItem = itemRepository.findItemByItemId(item.getItemId());
+                        item.set_id(savedItem.get_id());
+                        item.setItemId(savedItem.getItemId());
+                        item.setName(savedItem.getName());
+                        item.setModel(savedItem.getModel());
+                        item.setBrand(savedItem.getBrand());
+                        item.setYear(savedItem.getYear());
+                    }
+                }
+            }
+        }
         log.info("IN updateUser - user with id: {} successfully edited ", userId);
 
         return userRepository.save(savedUser);
@@ -132,4 +210,4 @@ public class UserServiceImpl implements UserService {
         log.info("IN deleteUserById - user with id: {} successfully deleted", userId);
     }
 
-    }
+}
