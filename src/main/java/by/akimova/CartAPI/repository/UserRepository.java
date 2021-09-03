@@ -8,16 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Repository for User.
+ * Repository interface for class {@link User}.
  *
  * @author anastasiyaakimava
  * @version 1.0
  */
 @Repository("userRepository")
 public interface UserRepository extends MongoRepository<User, String> {
-    void deleteById(UUID id);
-
-    User findById(UUID id);
+    void deleteUserByUserId(UUID userId);
 
     Optional<User> findByMail(String mail);
+
+    User findUserByUserId(UUID userId);
+
 }

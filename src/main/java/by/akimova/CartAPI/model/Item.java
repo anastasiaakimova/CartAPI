@@ -21,15 +21,15 @@ import java.util.UUID;
 public class Item {
     @Id
     private ObjectId _id;
-    @Field(name = "id")
+    @Field(name = "itemId")
     @Indexed(unique = true)
-    private UUID id;
+    private UUID itemId;
     @Field(name = "name")
     private String name;
+    @Field(name = "model")
+    private String model;
     @Field(name = "brand")
     private String brand;
     @Field(name = "year")
     private String year;
-    @Field(name = "number")
-    private Integer number;
 }

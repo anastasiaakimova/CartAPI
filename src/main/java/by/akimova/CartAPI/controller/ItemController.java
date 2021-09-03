@@ -26,6 +26,27 @@ public class ItemController {
     }
 
     /**
+     * The method show item.
+     *
+     * @param itemId This is item's id which should be viewed.
+     * @return response with body of item and status ok.
+     */
+    @GetMapping("{itemId}")
+    public ResponseEntity<?> showItem(@PathVariable(value = "itemId") UUID itemId) {
+        if (itemId == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Item item =  itemService.getById(itemId);
+
+        if (item == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(item, HttpStatus.OK);
+    }
+
+    /**
      * The method show items.
      *
      * @return response with body of items and status ok.
@@ -33,18 +54,6 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<Item>> getAllItems() {
         return ResponseEntity.ok(itemService.getAllItems());
-    }
-
-    /**
-     * The method show item.
-     *
-     * @param id This is item's id which should be viewed.
-     * @return response with body of item and status ok.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<?> showItem(@PathVariable(value = "id") UUID id) {
-        Item item = itemService.showItem(id);
-        return ResponseEntity.ok(item);
     }
 
     /**

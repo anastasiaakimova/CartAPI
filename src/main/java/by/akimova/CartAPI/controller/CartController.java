@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -24,14 +25,18 @@ public class CartController {
     }
 
     /**
-     * The method show cart with items.
+     * The method show carts.
      *
-     * @param id This is cart's id which should be viewed.
-     * @return response with body of cart and status ok.
+     * @return response with body of carts and status ok.
      */
+    @GetMapping
+    public ResponseEntity<List<Cart>> getAllCarts() {
+        return ResponseEntity.ok(cartService.getAll());
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> showCart(@PathVariable(value = "id") UUID id) {
-        Cart cart = cartService.showCart(id);
+    ResponseEntity<?> findCartById(@PathVariable(value = "id") UUID id) {
+        Cart cart = cartService.getCartById(id);
         return ResponseEntity.ok(cart);
     }
 
@@ -50,38 +55,39 @@ public class CartController {
     /**
      * The method update cart.
      *
-     * @param id   This is cart's id which should be updated.
-     * @param cart This is new body for cart which should be updated.
+     * @param cartId This is cart's id which should be updated.
+     * @param cart   This is new body for cart which should be updated.
      * @return response with body of updated cart and status ok.
      */
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateCart(@PathVariable(value = "id") UUID id, @RequestBody Cart cart) {
-        cartService.updateCart(id, cart);
+    @PutMapping("/{cartId}")
+    public ResponseEntity<?> updateCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
+        cartService.updateCart(cartId, cart);
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
     /**
      * The method delete cart.
      *
-     * @param id This is cart's id which should be deleted.
+     * @param cartId This is cart's id which should be deleted.
      * @return response status no_content.
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCart(@PathVariable(value = "id") UUID id) {
-        cartService.deleteCartById(id);
+    @DeleteMapping("/{cartId}")
+    public ResponseEntity<?> deleteCart(@PathVariable(value = "cartId") UUID cartId) {
+        cartService.deleteCartById(cartId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
      * The method delete items from cart.
      *
-     * @param id   This is cart's id from items should be deleted.
-     * @param cart this is body with.
+     * @param cartId This is cart's id from items should be deleted.
+     * @param cart   this is body with.
      * @return response status ok and message "updated".
      */
-    @PatchMapping("/{id}")
-    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "id") UUID id, Cart cart) {
-        cartService.deleteFromCart(id, cart);
-        return ResponseEntity.ok("updated");
+    @PutMapping("/delete/{cartId}")
+    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
+        Cart savedCart = cartService.getCartById(cartId);
+        cartService.deleteFromCart(cartId, cart);
+        return new ResponseEntity<>("updated", HttpStatus.OK);
     }
 }
