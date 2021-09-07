@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -110,10 +111,31 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    /**
+     * The method shows user by id.
+     *
+     * @param id This is id of the person to be found.
+     * @return ResponseEntity with found user and status ok.
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     ResponseEntity<?> findUserById(@PathVariable(value = "id") UUID id) {
         User user = userService.findById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    /**
+     * The method shows user by mail.
+     *
+     * @param mail This is mail of the person to be found.
+     * @return ResponseEntity with found user and status ok.
+     */
+    @GetMapping("mail/{mail}")
+    @PreAuthorize("hasAuthority('user:write')")
+    ResponseEntity<?> findUserByMail(@PathVariable(value = "mail") String mail) {
+        User user = userService.findByMail(mail).orElseThrow(
+                () -> new UsernameNotFoundException("User doesn't exists!")
+        );
         return ResponseEntity.ok(user);
     }
 
