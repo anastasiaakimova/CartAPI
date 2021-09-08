@@ -48,6 +48,8 @@ public class CartController {
         } catch (NullPointerException e) {
             log.error("In CartController getCartById - id is null");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IllegalStateException e){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return ResponseEntity.ok(cart);
     }

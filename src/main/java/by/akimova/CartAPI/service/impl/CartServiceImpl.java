@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.service.impl;
 
+import by.akimova.CartAPI.exception.NotFoundEntityException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.CartRepository;
@@ -7,6 +8,7 @@ import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.CartService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -45,15 +47,15 @@ public class CartServiceImpl implements CartService {
      * @return found cart.
      */
     @Override
-    public Cart getCartById(UUID cartId) {
+    public Cart getCartById(UUID cartId) throws IllegalStateException, NotFoundEntityException {
         if (cartId == null) {
             log.error("IN getCartById - id is null ");
-            throw new NullPointerException("cartId doesn't exist ");
+            throw new IllegalStateException("cartId is null");
         }
         Cart cart = cartRepository.findCartByCartId(cartId);
         if (cart == null) {
             log.error("IN getCartById - no cart found by id: {}", cartId);
-            throw new NullPointerException("Cart doesn't exist ");
+            throw new NotFoundEntityException("Cart not found");
         }
         log.info("IN getCartById - cart: {} found by id: {}", cart, cartId);
         return cart;
@@ -66,15 +68,16 @@ public class CartServiceImpl implements CartService {
      * @return found cart.
      */
     @Override
-    public Cart getCartByUserId(UUID userId) {
+    public Cart getCartByUserId(UUID userId) throws IllegalStateException, NotFoundEntityException {
+
         if (userId == null) {
             log.error("IN getCartByUserId - id is null ");
-            throw new NullPointerException("cartId doesn't exist ");
+            throw new IllegalStateException("cartId is null ");
         }
         Cart cart = cartRepository.findCartByUserId(userId);
         if (cart == null) {
             log.error("IN getCartByUserId - no cart found by userId: {}", userId);
-            throw new NullPointerException("Cart doesn't exist ");
+            throw new NotFoundEntityException("Cart doesn't exist ");
         }
         log.info("IN getCartByUserId - cart: {} found by userId: {}", cart, userId);
         return cart;
