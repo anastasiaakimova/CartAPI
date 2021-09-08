@@ -46,7 +46,7 @@ public class UserController {
     ResponseEntity<?> getUserById(@PathVariable(value = "id") UUID id) {
         User user;
         try {
-            user = userService.findById(id);
+            user = userService.getById(id);
         } catch (NullPointerException e) {
             log.error("In UserController getUserById - id doesn't exist");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

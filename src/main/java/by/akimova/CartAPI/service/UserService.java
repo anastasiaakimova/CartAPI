@@ -16,7 +16,7 @@ public interface UserService {
 
     User saveUser(User user);
 
-    User findById(UUID id);
+    User getById(UUID id);
 
     List<User> getAllUsers();
 
