@@ -43,12 +43,12 @@ public class UserController {
      */
 
     @GetMapping("/{id}")
-    ResponseEntity<?> findUserById(@PathVariable(value = "id") UUID id) {
+    ResponseEntity<?> getUserById(@PathVariable(value = "id") UUID id) {
         User user;
         try {
             user = userService.findById(id);
         } catch (NullPointerException e) {
-            log.error("In UserController findUserById - id is null");
+            log.error("In UserController getUserById - id doesn't exist");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(user, HttpStatus.OK);
