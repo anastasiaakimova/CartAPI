@@ -25,7 +25,7 @@ public class CartController {
     private final CartService cartService;
 
     /**
-     * The method show carts.
+     * The method get list of carts.
      *
      * @return response with body of carts and status ok.
      */
@@ -34,6 +34,12 @@ public class CartController {
         return ResponseEntity.ok(cartService.getAll());
     }
 
+    /**
+     * This method get cart by id.
+     *
+     * @param id This is cart's id.
+     * @return response with body of cart and status ok.
+     */
     @GetMapping("/{id}")
     ResponseEntity<?> getCartById(@PathVariable(value = "id") UUID id) {
         Cart cart;
@@ -41,6 +47,24 @@ public class CartController {
             cart = cartService.getCartById(id);
         } catch (NullPointerException e) {
             log.error("In CartController getCartById - id is null");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(cart);
+    }
+
+    /**
+     * This method get cart by userId.
+     *
+     * @param id This is user's id.
+     * @return response with body of cart and status ok.
+     */
+    @GetMapping("/userId/{id}")
+    ResponseEntity<?> getCartByUserId(@PathVariable(value = "id") UUID id) {
+        Cart cart;
+        try {
+            cart = cartService.getCartByUserId(id);
+        } catch (NullPointerException e) {
+            log.error("In CartController getCartByUserId - id is null");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(cart);
@@ -85,8 +109,8 @@ public class CartController {
     @DeleteMapping("/{cartId}")
     public ResponseEntity<?> deleteCart(@PathVariable(value = "cartId") UUID cartId) {
         try {
-           cartService.deleteCartById(cartId);
-        }catch (NullPointerException e){
+            cartService.deleteCartById(cartId);
+        } catch (NullPointerException e) {
             log.error("In CartController deleteCart - cart by id {} is not found", cartId);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -102,7 +126,8 @@ public class CartController {
      * @return response status ok and message "updated".
      */
     @DeleteMapping("/{cartId}/items")
-    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody List<UUID> itemIds) {
+    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID
+                                                    cartId, @RequestBody List<UUID> itemIds) {
         Cart cart;
         try {
             cart = cartService.deleteFromCart(cartId, itemIds);

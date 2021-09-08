@@ -16,6 +16,8 @@ public interface CartService {
 
     Cart getCartById(UUID id);
 
+    Cart getCartByUserId(UUID userId);
+
     Cart deleteFromCart(UUID id, List<UUID> itemIds);
 
     Cart saveCart(Cart cart);

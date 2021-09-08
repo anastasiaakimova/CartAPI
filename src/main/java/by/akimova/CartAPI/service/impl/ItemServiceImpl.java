@@ -3,11 +3,11 @@ package by.akimova.CartAPI.service.impl;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.ItemService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -19,13 +19,10 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
+@AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-
-    public ItemServiceImpl(ItemRepository itemRepository) {
-        this.itemRepository = itemRepository;
-    }
 
     /**
      * The method show all items with all information about it.
@@ -47,15 +44,13 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public Item getById(UUID itemId) {
-        Item result = itemRepository.findItemByItemId(itemId);
-
-        if (result == null) {
-            log.warn("IN findByCartId - no item found by id: {}", itemId);
-            return null;
+        Item item = itemRepository.findItemByItemId(itemId);
+        if (item == null){
+            log.error("IN getById - item is null");
+            throw new NullPointerException( "item is null");
         }
-
-        log.info("IN findCartById - item: {} found by id: {}", result, itemId);
-        return result;
+        log.info("IN getById - item: {} found by id: {}", item, itemId);
+        return item;
     }
 
     /**
@@ -80,18 +75,18 @@ public class ItemServiceImpl implements ItemService {
      */
     @Override
     public Item updateItem(UUID itemId, Item item) {
-        Item savedItem = itemRepository.findItemByItemId(itemId);
-
-        if (savedItem == null) {
-            log.warn("IN updateItem - no item found by id: {}", itemId);
-            return null;
+        Item dbItem = itemRepository.findItemByItemId(itemId);
+        if (item == null){
+            log.error("IN updateItem - item is null");
+            throw new NullPointerException( "item is null");
         }
-        savedItem.setName(item.getName());
-        savedItem.setBrand(item.getBrand());
-        savedItem.setModel(item.getModel());
-        savedItem.setYear(item.getYear());
+        dbItem.setName(item.getName());
+        dbItem.setBrand(item.getBrand());
+        dbItem.setModel(item.getModel());
+        dbItem.setYear(item.getYear());
+
         log.info("IN updateItem - item with id: {} successfully edited ", itemId);
-        return itemRepository.save(savedItem);
+        return itemRepository.save(dbItem);
     }
 
     /**

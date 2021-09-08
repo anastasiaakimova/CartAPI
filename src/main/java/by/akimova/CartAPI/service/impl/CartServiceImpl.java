@@ -5,14 +5,11 @@ import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.CartRepository;
 import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.CartService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * The class is implementation of cart's business logic.
@@ -20,6 +17,7 @@ import java.util.UUID;
  * @author anastasiyaakimava
  * @version 1.0
  */
+@AllArgsConstructor
 @Service
 @Slf4j
 public class CartServiceImpl implements CartService {
@@ -27,14 +25,8 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ItemRepository itemRepository;
 
-
-    public CartServiceImpl(@Qualifier("cartRepository") CartRepository cartRepository, @Qualifier("itemRepository") ItemRepository itemRepository) {
-        this.cartRepository = cartRepository;
-        this.itemRepository = itemRepository;
-    }
-
     /**
-     * The method show all carts with all information about it.
+     * The method get all carts with all information about it.
      *
      * @return list of carts.
      */
@@ -42,106 +34,72 @@ public class CartServiceImpl implements CartService {
     @Override
     public List<Cart> getAll() {
         List<Cart> carts = cartRepository.findAll();
-
-        for (Cart cart : carts) {
-            Collection<Item> cartsItem = new LinkedList<>();
-            Collection<Item> items = cart.getItems();
-            for (Item item : items) {
-                UUID id = item.getItemId();
-                Item savedItem = itemRepository.findItemByItemId(id);
-
-                item.set_id(savedItem.get_id());
-                item.setName(savedItem.getName());
-                item.setModel(savedItem.getModel());
-                item.setBrand(savedItem.getBrand());
-                item.setYear(savedItem.getYear());
-                cartsItem.add(item);
-            }
-            cart.getItems().remove(items);
-            cart.setItems(cartsItem);
-
-        }
         log.info("IN getAll - {} items found", carts.size());
         return carts;
     }
 
     /**
-     * The method show cart with all information about it.
+     * The method get cart by id with all information about it.
      *
      * @param cartId This is cart's id.
      * @return found cart.
      */
     @Override
     public Cart getCartById(UUID cartId) {
+        if (cartId == null) {
+            log.error("IN getCartById - id is null ");
+            throw new NullPointerException("cartId doesn't exist ");
+        }
         Cart cart = cartRepository.findCartByCartId(cartId);
-
         if (cart == null) {
-            log.warn("IN getCartById - no cart found by id: {}", cartId);
-            return null;
+            log.error("IN getCartById - no cart found by id: {}", cartId);
+            throw new NullPointerException("Cart doesn't exist ");
         }
-        Collection<Item> cartsItem = new LinkedList<>();
-        Collection<Item> items = cart.getItems();
-        for (Item item : items) {
-            UUID id = item.getItemId();
-            Item savedItem = itemRepository.findItemByItemId(id);
-
-            item.set_id(savedItem.get_id());
-            item.setName(savedItem.getName());
-            item.setModel(savedItem.getModel());
-            item.setBrand(savedItem.getBrand());
-            item.setYear(savedItem.getYear());
-            cartsItem.add(item);
-        }
-        cart.getItems().remove(items);
-        cart.setItems(cartsItem);
-
         log.info("IN getCartById - cart: {} found by id: {}", cart, cartId);
+        return cart;
+    }
 
+    /**
+     * The method get cart by userId with all information about it.
+     *
+     * @param userId This is user's id.
+     * @return found cart.
+     */
+    @Override
+    public Cart getCartByUserId(UUID userId) {
+        if (userId == null) {
+            log.error("IN getCartByUserId - id is null ");
+            throw new NullPointerException("cartId doesn't exist ");
+        }
+        Cart cart = cartRepository.findCartByUserId(userId);
+        if (cart == null) {
+            log.error("IN getCartByUserId - no cart found by userId: {}", userId);
+            throw new NullPointerException("Cart doesn't exist ");
+        }
+        log.info("IN getCartByUserId - cart: {} found by userId: {}", cart, userId);
         return cart;
     }
 
     /**
      * The method delete items from cart.
      *
-     * @param cartId This is cart's id which from needed to delete item.
-     * @param cart   This parameter consist items which needed delete.
+     * @param cartId  This is cart's id which from needed to delete item.
+     * @param itemIds This parameter consist items which needed delete.
      * @return cart without items which needed to be removed.
      */
     @Override
-    public Cart deleteFromCart(UUID cartId, Cart cart) {
-        Cart savedCart = cartRepository.findCartByCartId(cartId);
-        if (savedCart == null) {
-            log.warn("IN deleteFromCart - no cart found by id: {}", cartId);
-            return null;
-        }
-        Collection<Item> deleteItems = cart.getItems();
-        Collection<Item> items = savedCart.getItems();
-        Collection<Item> cartsItem = new LinkedList<>();
+    public Cart deleteFromCart(UUID cartId, List<UUID> itemIds) {
+        Cart dbCart = cartRepository.findCartByCartId(cartId);
 
+        Collection<Item> items = dbCart.getItems();
+        Collection<Item> toDelete = new ArrayList<>();
         for (Item item : items) {
-            UUID id = item.getItemId();
-            Item savedItem = itemRepository.findItemByItemId(id);
-            item.set_id(savedItem.get_id());
-            item.setName(savedItem.getName());
-            item.setModel(savedItem.getModel());
-            item.setBrand(savedItem.getBrand());
-            item.setYear(savedItem.getYear());
-            cartsItem.add(item);
+            if (itemIds.contains(item.getItemId()))
+                toDelete.add(item);
         }
-        for (Item item : deleteItems) {
-            UUID id = item.getItemId();
-            Item savedItem = itemRepository.findItemByItemId(id);
-            item.set_id(savedItem.get_id());
-            item.setName(savedItem.getName());
-            item.setModel(savedItem.getModel());
-            item.setBrand(savedItem.getBrand());
-            item.setYear(savedItem.getYear());
-            cartsItem.remove(item);
-
-        }
-        savedCart.setItems(cartsItem);
-        log.info("IN deleteFromCart - cart with id: {} successfully delete items {}", cartId, cart.getItems().size());
-        return cartRepository.save(savedCart);
+        items.removeAll(toDelete);
+        log.info("IN deleteFromCart - cart with id: {} successfully delete {} items", cartId, itemIds.size());
+        return cartRepository.save(dbCart);
     }
 
     /**
@@ -156,20 +114,13 @@ public class CartServiceImpl implements CartService {
         Collection<Item> items = cart.getItems();
         Collection<Item> cartsItem = new LinkedList<>();
         for (Item item : items) {
-            UUID id = item.getItemId();
-            Item savedItem = itemRepository.findItemByItemId(id);
-            item.set_id(savedItem.get_id());
-            item.setName(savedItem.getName());
-            item.setModel(savedItem.getModel());
-            item.setBrand(savedItem.getBrand());
-            item.setYear(savedItem.getYear());
-            cartsItem.add(item);
+            Item savedItem = itemRepository.findItemByItemId(item.getItemId());
+            cartsItem.add(savedItem);
         }
-        cart.getItems().remove(items);
         cart.setItems(cartsItem);
-
         log.info("IN saveCart - new cart with id: {} successfully added", cart.getCartId());
-        return cartRepository.insert(cart);
+        Cart savedCart = cartRepository.insert(cart);
+        return savedCart;
     }
 
     /**
@@ -181,40 +132,28 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public Cart updateCart(UUID cartId, Cart cart) {
-        Cart savedCart = cartRepository.findCartByCartId(cartId);
-        if (savedCart == null) {
-            log.warn("IN updateCart - no item found by id: {}", cartId);
-            return null;
+        if (cart == null) {
+            log.error("IN updateCart - cart is null");
+            throw new NullPointerException("cart is null");
         }
-
-        Collection<Item> newItems = cart.getItems();
-        Collection<Item> items = savedCart.getItems();
+        Cart dbCart = cartRepository.findCartByCartId(cartId);
+        if (dbCart == null) {
+            log.error("IN updateCart - no item found by id: {}", cartId);
+            throw new NullPointerException("cart is null");
+        }
         Collection<Item> cartsItem = new LinkedList<>();
-        for (Item item : items) {
-            UUID id = item.getItemId();
-            Item savedItem = itemRepository.findItemByItemId(id);
-            item.set_id(savedItem.get_id());
-            item.setName(savedItem.getName());
-            item.setModel(savedItem.getModel());
-            item.setBrand(savedItem.getBrand());
-            item.setYear(savedItem.getYear());
-            cartsItem.add(item);
+        if (cart.getItems() != null) {
+            for (Item item : cart.getItems()) {
+                Item savedItem = itemRepository.findItemByItemId(item.getItemId());
+                cartsItem.add(savedItem);
+            }
+            dbCart.setItems(cartsItem);
         }
-        savedCart.getItems().remove(items);
-        for (Item item : newItems) {
-            UUID id = item.getItemId();
-            Item savedItem = itemRepository.findItemByItemId(id);
-            item.set_id(savedItem.get_id());
-            item.setName(savedItem.getName());
-            item.setModel(savedItem.getModel());
-            item.setBrand(savedItem.getBrand());
-            item.setYear(savedItem.getYear());
-            cartsItem.add(item);
-        }
-        savedCart.setItems(cartsItem);
+        dbCart.setUserId(cart.getUserId());
+
 
         log.info("IN updateCart - cart with id: {} successfully edited ", cartId);
-        return cartRepository.save(savedCart);
+        return cartRepository.save(dbCart);
     }
 
     /**
@@ -225,6 +164,6 @@ public class CartServiceImpl implements CartService {
     @Override
     public void deleteCartById(UUID cartId) {
         cartRepository.deleteByCartId(cartId);
-        log.info("IN delete - cart with id: {} successfully deleted", cartId);
+        log.info("IN deleteCartById - cart with id: {} successfully deleted", cartId);
     }
 }
