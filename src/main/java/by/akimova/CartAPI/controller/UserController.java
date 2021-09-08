@@ -2,6 +2,8 @@ package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +20,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
+@AllArgsConstructor
+@Slf4j
 public class UserController {
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     /**
      * The method shows all users.
@@ -31,7 +31,7 @@ public class UserController {
      * @return ResponseEntity with list of users and status ok.
      */
     @GetMapping
-    ResponseEntity<List<User>> showAllUsers() {
+    ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
@@ -44,15 +44,13 @@ public class UserController {
 
     @GetMapping("/{id}")
     ResponseEntity<?> findUserById(@PathVariable(value = "id") UUID id) {
-        if (id == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        User user = userService.findById(id);
-
-        if (user == null) {
+        User user;
+        try {
+            user = userService.findById(id);
+        } catch (NullPointerException e) {
+            log.error("In UserController findUserById - id is null");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -64,8 +62,7 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody User user) {
-        userService.saveUser(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
     }
 
     /**
@@ -77,8 +74,14 @@ public class UserController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable(value = "id") UUID id, @RequestBody User user) {
-        userService.updateUser(id, user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        User updatedUser;
+        try {
+            updatedUser = userService.updateUser(id, user);
+        } catch (NullPointerException e) {
+            log.error("In UserController updateUser - user by id {} is null", id);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     /**
@@ -89,7 +92,12 @@ public class UserController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable(value = "id") UUID id) {
-        userService.deleteUserById(id);
+        try {
+            userService.deleteUserById(id);
+        }catch (NullPointerException e) {
+            log.error("In UserController deleteUser - cart by id {} is not found", id);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

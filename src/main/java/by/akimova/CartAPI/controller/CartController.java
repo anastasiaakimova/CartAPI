@@ -2,6 +2,8 @@ package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.service.CartService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +17,12 @@ import java.util.UUID;
  * @author anastasiyaakimava
  * @version 1.0
  */
+@Slf4j
 @RestController
 @RequestMapping("/carts")
+@AllArgsConstructor
 public class CartController {
     private final CartService cartService;
-
-    public CartController(CartService cartService) {
-        this.cartService = cartService;
-    }
 
     /**
      * The method show carts.
@@ -35,8 +35,14 @@ public class CartController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<?> findCartById(@PathVariable(value = "id") UUID id) {
-        Cart cart = cartService.getCartById(id);
+    ResponseEntity<?> getCartById(@PathVariable(value = "id") UUID id) {
+        Cart cart;
+        try {
+            cart = cartService.getCartById(id);
+        } catch (NullPointerException e) {
+            log.error("In CartController getCartById - id is null");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return ResponseEntity.ok(cart);
     }
 
@@ -48,8 +54,7 @@ public class CartController {
      */
     @PostMapping
     public ResponseEntity<?> addCart(@RequestBody Cart cart) {
-        cartService.saveCart(cart);
-        return new ResponseEntity<>(cart, HttpStatus.CREATED);
+        return new ResponseEntity<>(cartService.saveCart(cart), HttpStatus.CREATED);
     }
 
     /**
@@ -61,8 +66,14 @@ public class CartController {
      */
     @PutMapping("/{cartId}")
     public ResponseEntity<?> updateCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
-        cartService.updateCart(cartId, cart);
-        return new ResponseEntity<>(cart, HttpStatus.OK);
+        Cart updatedCart;
+        try {
+            updatedCart = cartService.updateCart(cartId, cart);
+        } catch (NullPointerException e) {
+            log.error("In CartController updateCart - cart by id {} is null", cartId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(updatedCart, HttpStatus.OK);
     }
 
     /**
@@ -73,21 +84,32 @@ public class CartController {
      */
     @DeleteMapping("/{cartId}")
     public ResponseEntity<?> deleteCart(@PathVariable(value = "cartId") UUID cartId) {
-        cartService.deleteCartById(cartId);
+        try {
+           cartService.deleteCartById(cartId);
+        }catch (NullPointerException e){
+            log.error("In CartController deleteCart - cart by id {} is not found", cartId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**
      * The method delete items from cart.
      *
-     * @param cartId This is cart's id from items should be deleted.
-     * @param cart   this is body with.
+     * @param cartId  This is cart's id from items should be deleted.
+     * @param itemIds List of id of items which should be deleted.
      * @return response status ok and message "updated".
      */
-    @PutMapping("/delete/{cartId}")
-    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
-        Cart savedCart = cartService.getCartById(cartId);
-        cartService.deleteFromCart(cartId, cart);
-        return new ResponseEntity<>("updated", HttpStatus.OK);
+    @DeleteMapping("/{cartId}/items")
+    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody List<UUID> itemIds) {
+        Cart cart;
+        try {
+            cart = cartService.deleteFromCart(cartId, itemIds);
+        } catch (NullPointerException e) {
+            log.error("In CartController deleteFromCart - cart by id {} is not found", cartId);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 }

@@ -2,6 +2,8 @@ package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,12 +19,10 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/items")
+@AllArgsConstructor
+@Slf4j
 public class ItemController {
     private final ItemService itemService;
-
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
 
     /**
      * The method show item.
@@ -31,17 +31,14 @@ public class ItemController {
      * @return response with body of item and status ok.
      */
     @GetMapping("{itemId}")
-    public ResponseEntity<?> showItem(@PathVariable(value = "itemId") UUID itemId) {
-        if (itemId == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        Item item =  itemService.getById(itemId);
-
-        if (item == null) {
+    public ResponseEntity<?> getItemById(@PathVariable(value = "itemId") UUID itemId) {
+        Item item;
+        try {
+            item = itemService.getById(itemId);
+        } catch (NullPointerException e) {
+            log.error("In ItemController getItemById - item by itemId: {} is null", itemId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
 
@@ -63,8 +60,7 @@ public class ItemController {
      */
     @PostMapping
     public ResponseEntity<?> addItem(@RequestBody Item item) {
-        itemService.saveItem(item);
-        return new ResponseEntity<>(item, HttpStatus.CREATED);
+        return new ResponseEntity<>(itemService.saveItem(item), HttpStatus.CREATED);
     }
 
     /**
@@ -76,8 +72,14 @@ public class ItemController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateItem(@PathVariable(value = "id") UUID id, @RequestBody Item item) {
-        itemService.updateItem(id, item);
-        return new ResponseEntity<>(item, HttpStatus.OK);
+        Item updatedItem;
+        try {
+            updatedItem = itemService.updateItem(id, item);
+        } catch (NullPointerException e) {
+            log.error("In ItemController updateItem - item by id {} is null", id);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(updatedItem, HttpStatus.OK);
     }
 
     /**
@@ -88,7 +90,12 @@ public class ItemController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteItem(@PathVariable(value = "id") UUID id) {
-        itemService.deleteItemById(id);
+        try {
+            itemService.deleteItemById(id);
+        }catch (NullPointerException e){
+            log.error("In ItemController deleteItem - item by id {} is not found", id);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
