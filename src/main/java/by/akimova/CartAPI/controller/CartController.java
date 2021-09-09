@@ -1,7 +1,8 @@
 package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
+import by.akimova.CartAPI.exception.NotAccessException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.service.CartService;
 import lombok.AllArgsConstructor;
@@ -50,7 +51,7 @@ public class CartController {
         Cart cart;
         try {
             cart = cartService.getCartById(id);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN CartController getCartById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -67,11 +68,12 @@ public class CartController {
      * @return response with body of cart and status ok.
      */
     @GetMapping("/userId/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     ResponseEntity<?> getCartByUserId(@PathVariable(value = "id") UUID id) {
         Cart cart;
         try {
             cart = cartService.getCartByUserId(id);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN CartController getCartByUserId - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -88,7 +90,6 @@ public class CartController {
      * @return response with body of created cart and status ok.
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> addCart(@RequestBody Cart cart) {
         return new ResponseEntity<>(cartService.saveCart(cart), HttpStatus.CREATED);
     }
@@ -101,17 +102,19 @@ public class CartController {
      * @return response with body of updated cart and status ok.
      */
     @PutMapping("/{cartId}")
-    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> updateCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
         Cart updatedCart;
         try {
             updatedCart = cartService.updateCart(cartId, cart);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN CartController updateCart - cartId is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
             log.error("IN CartController updateCart - cart by id {} not found", cartId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (NotAccessException e) {
+            log.error("IN CartController updateCart - user can't do this");
+            return new ResponseEntity<>("This user can't update this cart", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(updatedCart, HttpStatus.OK);
     }
@@ -123,9 +126,17 @@ public class CartController {
      * @return response status no_content.
      */
     @DeleteMapping("/{cartId}")
-    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> deleteCart(@PathVariable(value = "cartId") UUID cartId) {
-        cartService.deleteCartById(cartId);
+        try {
+            cartService.deleteCartById(cartId);
+        } catch (EntityNotFoundException e) {
+            log.error("IN CartController deleteCart - cart by id {} not found", cartId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (NotAccessException e) {
+            log.error("IN CartController deleteCart - user can't do this");
+            return new ResponseEntity<>("This user can't delete this cart",HttpStatus.FORBIDDEN);
+        }
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -136,19 +147,22 @@ public class CartController {
      * @param itemIds List of id of items which should be deleted.
      * @return response status ok and message "updated".
      */
-    @PreAuthorize("hasAuthority('user:read')")
+
     @DeleteMapping("/{cartId}/items")
     public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID
                                                     cartId, @RequestBody List<UUID> itemIds) {
         Cart cart;
         try {
             cart = cartService.deleteFromCart(cartId, itemIds);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN CartController deleteFromCart - cartId is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
             log.error("IN CartController deleteFromCart - cart with id {} is not found", cartId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }catch (NotAccessException e){
+            log.error("IN CartController deleteFromCart - user can't do this");
+            return new ResponseEntity<>("This user can't delete items from this cart", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }

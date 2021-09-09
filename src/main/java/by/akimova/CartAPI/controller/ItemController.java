@@ -1,7 +1,7 @@
 package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
 import lombok.AllArgsConstructor;
@@ -38,7 +38,7 @@ public class ItemController {
         Item item;
         try {
             item = itemService.getById(itemId);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN ItemController getItemById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -83,7 +83,7 @@ public class ItemController {
         Item updatedItem;
         try {
             updatedItem = itemService.updateItem(id, item);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN ItemController updateItem - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {

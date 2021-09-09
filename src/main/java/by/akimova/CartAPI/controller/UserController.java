@@ -1,7 +1,8 @@
 package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
+import by.akimova.CartAPI.exception.NotFreeUsernameException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import lombok.AllArgsConstructor;
@@ -56,7 +57,7 @@ public class UserController {
         User user;
         try {
             user = userService.getById(id);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN UserController getUserById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -75,8 +76,13 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> addUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
-
+        User savedUser;
+        try {
+            savedUser = userService.saveUser(user);
+        }catch (NotFreeUsernameException e){
+            return new ResponseEntity<>("This username is already taken ", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
     /**
@@ -94,8 +100,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    //TODO: Может ли юзер сам себя апдейтить?
-
     /**
      * The method update item.
      *
@@ -108,7 +112,7 @@ public class UserController {
         User updatedUser;
         try {
             updatedUser = userService.updateUser(id, user);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN UserController updateUser - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -130,56 +134,5 @@ public class UserController {
         userService.deleteUserById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-    /*    /**
-     * The method add new user to database.
-     *
-     * @param user This is parameters of user.
-     * @return ResponseEntity with user and status created.
-     *//*
-    @PostMapping
-    @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        User savedUser = userService.findByMail(user.getMail()).*//*get();*//*orElseThrow(
-                () -> new UsernameNotFoundException("User doesn't exists!")
-        );
-        if (savedUser != null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        user.setRole(Role.USER);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userService.saveUser(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
-    }*/
-//
-//        /**
-//         * The method shows all users.
-//         *
-//         * @return ResponseEntity with list of users and status ok.
-//         */
-//        @GetMapping
-//        ResponseEntity<List<User>> showAllUsers () {
-//            return ResponseEntity.ok(userService.getAllUsers());
-//        }
-//
-//        /**
-//         * The method shows user by id.
-//         *
-//         * @param id This is user's id which should be viewed.
-//         * @return ResponseEntity with body of user and status ok.
-//         */
-//
-//        @GetMapping("/{id}")
-//        ResponseEntity<?> findUserById (@PathVariable(value = "id") UUID id){
-//            if (id == null) {
-//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//            }
-//            User user = userService.findById(id);
-//
-//            if (user == null) {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//            }
-//
-//            return new ResponseEntity<>(user, HttpStatus.OK);
-//        }
 }
 
