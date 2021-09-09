@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.service.impl;
 
-import by.akimova.CartAPI.exception.NotFoundEntityException;
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
@@ -44,15 +45,15 @@ public class UserServiceImpl implements UserService {
      * @return found user.
      */
     @Override
-    public User getById(UUID userId) throws NotFoundEntityException {
+    public User getById(UUID userId) throws EntityNotFoundException, ValidationException {
         if (userId == null) {
             log.error("IN getById - userId is null ");
-            throw new IllegalStateException("userId is null");
+            throw new ValidationException("userId is null");
         }
         User user = userRepository.findUserByUserId(userId);
         if (user == null) {
             log.error("IN getById -  no user found by id {}", userId);
-            throw new NotFoundEntityException("user not found");
+            throw new EntityNotFoundException("user not found");
         }
         log.info("IN getById - user: {} found by id: {}", user, userId);
         return user;
@@ -81,15 +82,15 @@ public class UserServiceImpl implements UserService {
      * @return Updated user.
      */
     @Override
-    public User updateUser(UUID userId, User user) throws NotFoundEntityException {
+    public User updateUser(UUID userId, User user) throws EntityNotFoundException, ValidationException {
         if (user == null) {
             log.error("IN updateUser - user is null");
-            throw new IllegalStateException("user is null");
+            throw new ValidationException("user is null");
         }
         User dbUser = userRepository.findUserByUserId(userId);
         if (dbUser == null) {
             log.error("IN updateUser - user not found by id {}", userId);
-            throw new NotFoundEntityException("user not found");
+            throw new EntityNotFoundException("user not found");
         }
         dbUser.setName(user.getName());
         dbUser.setMail(user.getMail());

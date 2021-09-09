@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.service.impl;
 
-import by.akimova.CartAPI.exception.NotFoundEntityException;
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.CartRepository;
@@ -46,15 +47,15 @@ public class CartServiceImpl implements CartService {
      * @return found cart.
      */
     @Override
-    public Cart getCartById(UUID cartId) throws NotFoundEntityException {
+    public Cart getCartById(UUID cartId) throws EntityNotFoundException, ValidationException {
         if (cartId == null) {
             log.error("IN getCartById - id is null ");
-            throw new IllegalStateException("cartId is null");
+            throw new ValidationException("cartId is null");
         }
         Cart cart = cartRepository.findCartByCartId(cartId);
         if (cart == null) {
             log.error("IN getCartById - no cart found by id: {}", cartId);
-            throw new NotFoundEntityException("Cart not found");
+            throw new EntityNotFoundException("Cart not found");
         }
         log.info("IN getCartById - cart: {} found by id: {}", cart, cartId);
         return cart;
@@ -67,15 +68,15 @@ public class CartServiceImpl implements CartService {
      * @return found cart.
      */
     @Override
-    public Cart getCartByUserId(UUID userId) throws NotFoundEntityException {
+    public Cart getCartByUserId(UUID userId) throws EntityNotFoundException, ValidationException {
         if (userId == null) {
             log.error("IN getCartByUserId - id is null ");
-            throw new IllegalStateException("cartId is null ");
+            throw new ValidationException("cartId is null ");
         }
         Cart cart = cartRepository.findCartByUserId(userId);
         if (cart == null) {
             log.error("IN getCartByUserId - no cart found by userId: {}", userId);
-            throw new NotFoundEntityException("Cart doesn't exist ");
+            throw new EntityNotFoundException("Cart doesn't exist ");
         }
         log.info("IN getCartByUserId - cart: {} found by userId: {}", cart, userId);
         return cart;
@@ -89,15 +90,15 @@ public class CartServiceImpl implements CartService {
      * @return cart without items which needed to be removed.
      */
     @Override
-    public Cart deleteFromCart(UUID cartId, List<UUID> itemIds) throws NotFoundEntityException {
+    public Cart deleteFromCart(UUID cartId, List<UUID> itemIds) throws EntityNotFoundException, ValidationException {
         if (cartId == null) {
             log.error("IN deleteFromCart - id is null ");
-            throw new IllegalStateException("cartId is null ");
+            throw new ValidationException("cartId is null");
         }
         Cart dbCart = cartRepository.findCartByCartId(cartId);
         if (dbCart == null) {
             log.error("IN deleteFromCart - no cart found by cartId: {}", cartId);
-            throw new NotFoundEntityException("Cart doesn't exist ");
+            throw new EntityNotFoundException("Cart doesn't exist ");
         }
         Collection<Item> items = dbCart.getItems();
         Collection<Item> toDelete = new ArrayList<>();
@@ -139,15 +140,15 @@ public class CartServiceImpl implements CartService {
      * @return Updated cart.
      */
     @Override
-    public Cart updateCart(UUID cartId, Cart cart) throws IllegalStateException, NotFoundEntityException {
+    public Cart updateCart(UUID cartId, Cart cart) throws IllegalStateException, EntityNotFoundException, ValidationException {
         if (cart == null) {
             log.error("IN updateCart - cart is null");
-            throw new IllegalStateException("cart is null");
+            throw new ValidationException("cart is null");
         }
         Cart dbCart = cartRepository.findCartByCartId(cartId);
         if (dbCart == null) {
             log.error("IN updateCart - no cart found by id: {}", cartId);
-            throw new NotFoundEntityException("cart not found");
+            throw new EntityNotFoundException("cart not found");
         }
         Collection<Item> cartsItem = new LinkedList<>();
         if (cart.getItems() != null) {

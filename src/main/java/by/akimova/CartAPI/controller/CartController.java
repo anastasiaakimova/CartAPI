@@ -1,8 +1,10 @@
 package by.akimova.CartAPI.controller;
 
-import by.akimova.CartAPI.exception.NotFoundEntityException;
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.service.CartService;
+import com.mongodb.client.model.ValidationAction;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -46,10 +48,10 @@ public class CartController {
         Cart cart;
         try {
             cart = cartService.getCartById(id);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN CartController getCartById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
+        } catch (EntityNotFoundException e) {
             log.error("IN CartController getCartById - cart by id {} not found ", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -67,10 +69,10 @@ public class CartController {
         Cart cart;
         try {
             cart = cartService.getCartByUserId(id);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN CartController getCartByUserId - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
+        } catch (EntityNotFoundException e) {
             log.error("IN CartController getCartByUserId - cart by userId {} not found ", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -100,10 +102,10 @@ public class CartController {
         Cart updatedCart;
         try {
             updatedCart = cartService.updateCart(cartId, cart);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN CartController updateCart - cartId is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
+        } catch (EntityNotFoundException e) {
             log.error("IN CartController updateCart - cart by id {} not found", cartId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -134,11 +136,11 @@ public class CartController {
         Cart cart;
         try {
             cart = cartService.deleteFromCart(cartId, itemIds);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN CartController deleteFromCart - cartId is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
-            log.error("IN CartController deleteFromCart - cart by id {} is not found", cartId);
+        } catch (EntityNotFoundException e) {
+            log.error("IN CartController deleteFromCart - cart with id {} is not found", cartId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(cart, HttpStatus.OK);

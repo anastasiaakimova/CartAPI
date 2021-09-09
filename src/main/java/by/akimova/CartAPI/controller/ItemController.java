@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.controller;
 
-import by.akimova.CartAPI.exception.NotFoundEntityException;
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
 import lombok.AllArgsConstructor;
@@ -36,10 +37,10 @@ public class ItemController {
         Item item;
         try {
             item = itemService.getById(itemId);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN ItemController getItemById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
+        } catch (EntityNotFoundException e) {
             log.error("In ItemController getItemById - item by itemId: {} is null", itemId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -79,10 +80,10 @@ public class ItemController {
         Item updatedItem;
         try {
             updatedItem = itemService.updateItem(id, item);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN ItemController updateItem - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
+        } catch (EntityNotFoundException e) {
             log.error("In ItemController updateItem - item by id {} not found", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -97,12 +98,7 @@ public class ItemController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteItem(@PathVariable(value = "id") UUID id) {
-        try {
-            itemService.deleteItemById(id);
-        } catch (IllegalStateException e) {
-            log.error("In ItemController deleteItem - item by id {} is not found", id);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        itemService.deleteItemById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.controller;
 
-import by.akimova.CartAPI.exception.NotFoundEntityException;
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import lombok.AllArgsConstructor;
@@ -48,10 +49,10 @@ public class UserController {
         User user;
         try {
             user = userService.getById(id);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN UserController getUserById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
+        } catch (EntityNotFoundException e) {
             log.error("IN UserController getUserById - user by id {} not found", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -81,10 +82,10 @@ public class UserController {
         User updatedUser;
         try {
             updatedUser = userService.updateUser(id, user);
-        } catch (IllegalStateException e) {
+        } catch (ValidationException e) {
             log.error("IN UserController updateUser - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundEntityException e) {
+        } catch (EntityNotFoundException e) {
             log.error("IN UserController updateUser - user by id {} not found", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -99,12 +100,7 @@ public class UserController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable(value = "id") UUID id) {
-        try {
-            userService.deleteUserById(id);
-        } catch (IllegalStateException e) {
-            log.error("IN UserController deleteUser - user by id {} is not found", id);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        userService.deleteUserById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

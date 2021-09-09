@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.service.impl;
 
-import by.akimova.CartAPI.exception.NotFoundEntityException;
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.ItemService;
@@ -44,15 +45,15 @@ public class ItemServiceImpl implements ItemService {
      * @return found item.
      */
     @Override
-    public Item getById(UUID itemId) throws NotFoundEntityException {
+    public Item getById(UUID itemId) throws EntityNotFoundException, ValidationException {
         if (itemId == null) {
             log.error("IN getById - id is null ");
-            throw new IllegalStateException("itemId is null");
+            throw new ValidationException("itemId is null");
         }
         Item item = itemRepository.findItemByItemId(itemId);
         if (item == null){
             log.error("IN getById - no item found by id: {}", itemId);
-            throw new NotFoundEntityException("Item not found");
+            throw new EntityNotFoundException("Item not found");
         }
         log.info("IN getById - item: {} found by id: {}", item, itemId);
         return item;
@@ -79,15 +80,15 @@ public class ItemServiceImpl implements ItemService {
      * @return Updated item.
      */
     @Override
-    public Item updateItem(UUID itemId, Item item) throws NotFoundEntityException {
+    public Item updateItem(UUID itemId, Item item) throws EntityNotFoundException, ValidationException {
         if (item == null) {
             log.error("IN updateItem - item is null");
-            throw new IllegalStateException("item is null");
+            throw new ValidationException("item is null");
         }
         Item dbItem = itemRepository.findItemByItemId(itemId);
         if (dbItem == null){
             log.error("IN updateItem - no item found by id: {}", itemId);
-            throw new NotFoundEntityException( "item is null");
+            throw new EntityNotFoundException( "item is null");
         }
         dbItem.setName(item.getName());
         dbItem.setBrand(item.getBrand());
