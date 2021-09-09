@@ -26,6 +26,7 @@ public class User {
     @Field(name = "name")
     private String name;
     @Field(name = "mail")
+    @Indexed(unique = true)
     private String mail;
     @Field(name = "password")
     private String password;
