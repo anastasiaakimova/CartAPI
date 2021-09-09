@@ -6,9 +6,9 @@ package by.akimova.CartAPI.exception;
  * @author anastasiyaakimava
  * @version 1.0
  */
-public class ValidationException extends Exception {
+public class NotValidUsernameException extends Exception {
 
-    public ValidationException(String message) {
+    public NotValidUsernameException(String message) {
         super(message);
     }
 }
