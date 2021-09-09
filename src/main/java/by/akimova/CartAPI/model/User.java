@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -29,6 +30,7 @@ public class User {
     @Indexed(unique = true)
     private String mail;
     @Field(name = "password")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @Field(name = "role")
     private Role role;
