@@ -1,8 +1,14 @@
 package by.akimova.CartAPI.exception;
 
-public class NotFoundEntityException extends Exception {
+/**
+ * This is exception class for catching empty entity.
+ *
+ * @author anastasiyaakimava
+ * @version 1.0
+ */
+public class EntityNotFoundException extends Exception {
 
-    public NotFoundEntityException(String message) {
+    public EntityNotFoundException(String message) {
         super(message);
     }
 }
