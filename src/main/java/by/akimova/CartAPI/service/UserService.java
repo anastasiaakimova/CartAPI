@@ -1,5 +1,7 @@
 package by.akimova.CartAPI.service;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.User;
 
 import java.util.List;
@@ -16,11 +18,11 @@ public interface UserService {
 
     User saveUser(User user);
 
-    User findById(UUID id);
+    User getById(UUID id) throws EntityNotFoundException, ValidationException;
 
     List<User> getAllUsers();
 
-    User updateUser(UUID id, User user);
+    User updateUser(UUID id, User user) throws EntityNotFoundException, ValidationException;
 
     void deleteUserById(UUID id);
 

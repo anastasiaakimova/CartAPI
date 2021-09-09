@@ -28,5 +28,6 @@ public class Cart {
     private UUID cartId;
     @Field(name = "item")
     private Collection<Item> items;
-
+    @Field(name = "userId")
+    private UUID userId;
 }

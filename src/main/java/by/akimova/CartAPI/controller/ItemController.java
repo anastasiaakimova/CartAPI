@@ -1,7 +1,11 @@
 package by.akimova.CartAPI.controller;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,12 +22,10 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/items")
+@AllArgsConstructor
+@Slf4j
 public class ItemController {
     private final ItemService itemService;
-
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
 
     /**
      * The method show item.
@@ -32,17 +34,17 @@ public class ItemController {
      * @return response with body of item and status ok.
      */
     @GetMapping("{itemId}")
-    public ResponseEntity<?> showItem(@PathVariable(value = "itemId") UUID itemId) {
-        if (itemId == null) {
+    public ResponseEntity<?> getItemById(@PathVariable(value = "itemId") UUID itemId) {
+        Item item;
+        try {
+            item = itemService.getById(itemId);
+        } catch (ValidationException e) {
+            log.error("IN ItemController getItemById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        Item item =  itemService.getById(itemId);
-
-        if (item == null) {
+        } catch (EntityNotFoundException e) {
+            log.error("In ItemController getItemById - item by itemId: {} is null", itemId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
 
@@ -65,8 +67,7 @@ public class ItemController {
     @PostMapping
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> addItem(@RequestBody Item item) {
-        itemService.saveItem(item);
-        return new ResponseEntity<>(item, HttpStatus.CREATED);
+        return new ResponseEntity<>(itemService.saveItem(item), HttpStatus.CREATED);
     }
 
     /**
@@ -79,8 +80,17 @@ public class ItemController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> updateItem(@PathVariable(value = "id") UUID id, @RequestBody Item item) {
-        itemService.updateItem(id, item);
-        return new ResponseEntity<>(item, HttpStatus.OK);
+        Item updatedItem;
+        try {
+            updatedItem = itemService.updateItem(id, item);
+        } catch (ValidationException e) {
+            log.error("IN ItemController updateItem - id is null");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            log.error("In ItemController updateItem - item by id {} not found", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(updatedItem, HttpStatus.OK);
     }
 
     /**

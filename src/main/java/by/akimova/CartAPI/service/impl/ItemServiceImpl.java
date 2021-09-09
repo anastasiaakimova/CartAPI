@@ -1,8 +1,11 @@
 package by.akimova.CartAPI.service.impl;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.ItemService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +21,10 @@ import java.util.UUID;
  */
 @Service
 @Slf4j
+@AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-
-    public ItemServiceImpl(ItemRepository itemRepository) {
-        this.itemRepository = itemRepository;
-    }
 
     /**
      * The method show all items with all information about it.
@@ -45,16 +45,18 @@ public class ItemServiceImpl implements ItemService {
      * @return found item.
      */
     @Override
-    public Item getById(UUID itemId) {
-        Item result = itemRepository.findItemByItemId(itemId);
-
-        if (result == null) {
-            log.warn("IN findByCartId - no item found by id: {}", itemId);
-            return null;
+    public Item getById(UUID itemId) throws EntityNotFoundException, ValidationException {
+        if (itemId == null) {
+            log.error("IN getById - id is null ");
+            throw new ValidationException("itemId is null");
         }
-
-        log.info("IN findCartById - item: {} found by id: {}", result, itemId);
-        return result;
+        Item item = itemRepository.findItemByItemId(itemId);
+        if (item == null){
+            log.error("IN getById - no item found by id: {}", itemId);
+            throw new EntityNotFoundException("Item not found");
+        }
+        log.info("IN getById - item: {} found by id: {}", item, itemId);
+        return item;
     }
 
     /**
@@ -78,19 +80,23 @@ public class ItemServiceImpl implements ItemService {
      * @return Updated item.
      */
     @Override
-    public Item updateItem(UUID itemId, Item item) {
-        Item savedItem = itemRepository.findItemByItemId(itemId);
-
-        if (savedItem == null) {
-            log.warn("IN updateItem - no item found by id: {}", itemId);
-            return null;
+    public Item updateItem(UUID itemId, Item item) throws EntityNotFoundException, ValidationException {
+        if (item == null) {
+            log.error("IN updateItem - item is null");
+            throw new ValidationException("item is null");
         }
-        savedItem.setName(item.getName());
-        savedItem.setBrand(item.getBrand());
-        savedItem.setModel(item.getModel());
-        savedItem.setYear(item.getYear());
+        Item dbItem = itemRepository.findItemByItemId(itemId);
+        if (dbItem == null){
+            log.error("IN updateItem - no item found by id: {}", itemId);
+            throw new EntityNotFoundException( "item is null");
+        }
+        dbItem.setName(item.getName());
+        dbItem.setBrand(item.getBrand());
+        dbItem.setModel(item.getModel());
+        dbItem.setYear(item.getYear());
+
         log.info("IN updateItem - item with id: {} successfully edited ", itemId);
-        return itemRepository.save(savedItem);
+        return itemRepository.save(dbItem);
     }
 
     /**

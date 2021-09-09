@@ -1,7 +1,11 @@
 package by.akimova.CartAPI.controller;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.service.CartService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,17 +20,15 @@ import java.util.UUID;
  * @author anastasiyaakimava
  * @version 1.0
  */
+@Slf4j
 @RestController
 @RequestMapping("/carts")
+@AllArgsConstructor
 public class CartController {
     private final CartService cartService;
 
-    public CartController(CartService cartService) {
-        this.cartService = cartService;
-    }
-
     /**
-     * The method show carts.
+     * The method get list of carts.
      *
      * @return response with body of carts and status ok.
      */
@@ -36,10 +38,46 @@ public class CartController {
         return ResponseEntity.ok(cartService.getAll());
     }
 
+    /**
+     * This method get cart by id.
+     *
+     * @param id This is cart's id.
+     * @return response with body of cart and status ok.
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('user:write')")
-    ResponseEntity<?> findCartById(@PathVariable(value = "id") UUID id) {
-        Cart cart = cartService.getCartById(id);
+    ResponseEntity<?> getCartById(@PathVariable(value = "id") UUID id) {
+        Cart cart;
+        try {
+            cart = cartService.getCartById(id);
+        } catch (ValidationException e) {
+            log.error("IN CartController getCartById - id is null");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            log.error("IN CartController getCartById - cart by id {} not found ", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(cart);
+    }
+
+    /**
+     * This method get cart by userId.
+     *
+     * @param id This is user's id.
+     * @return response with body of cart and status ok.
+     */
+    @GetMapping("/userId/{id}")
+    ResponseEntity<?> getCartByUserId(@PathVariable(value = "id") UUID id) {
+        Cart cart;
+        try {
+            cart = cartService.getCartByUserId(id);
+        } catch (ValidationException e) {
+            log.error("IN CartController getCartByUserId - id is null");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            log.error("IN CartController getCartByUserId - cart by userId {} not found ", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return ResponseEntity.ok(cart);
     }
 
@@ -52,8 +90,7 @@ public class CartController {
     @PostMapping
     @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> addCart(@RequestBody Cart cart) {
-        cartService.saveCart(cart);
-        return new ResponseEntity<>(cart, HttpStatus.CREATED);
+        return new ResponseEntity<>(cartService.saveCart(cart), HttpStatus.CREATED);
     }
 
     /**
@@ -66,8 +103,17 @@ public class CartController {
     @PutMapping("/{cartId}")
     @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<?> updateCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
-        cartService.updateCart(cartId, cart);
-        return new ResponseEntity<>(cart, HttpStatus.OK);
+        Cart updatedCart;
+        try {
+            updatedCart = cartService.updateCart(cartId, cart);
+        } catch (ValidationException e) {
+            log.error("IN CartController updateCart - cartId is null");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            log.error("IN CartController updateCart - cart by id {} not found", cartId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(updatedCart, HttpStatus.OK);
     }
 
     /**
@@ -86,15 +132,24 @@ public class CartController {
     /**
      * The method delete items from cart.
      *
-     * @param cartId This is cart's id from items should be deleted.
-     * @param cart   this is body with.
+     * @param cartId  This is cart's id from items should be deleted.
+     * @param itemIds List of id of items which should be deleted.
      * @return response status ok and message "updated".
      */
-    @PutMapping("/delete/{cartId}")
     @PreAuthorize("hasAuthority('user:read')")
-    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody Cart cart) {
-        Cart savedCart = cartService.getCartById(cartId);
-        cartService.deleteFromCart(cartId, cart);
-        return new ResponseEntity<>("updated", HttpStatus.OK);
+    @DeleteMapping("/{cartId}/items")
+    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID
+                                                    cartId, @RequestBody List<UUID> itemIds) {
+        Cart cart;
+        try {
+            cart = cartService.deleteFromCart(cartId, itemIds);
+        } catch (ValidationException e) {
+            log.error("IN CartController deleteFromCart - cartId is null");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            log.error("IN CartController deleteFromCart - cart with id {} is not found", cartId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 }

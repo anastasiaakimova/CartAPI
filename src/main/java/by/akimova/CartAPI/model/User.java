@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -32,6 +31,5 @@ public class User {
     private String password;
     @Field(name = "role")
     private Role role;
-    @Field(name = "cartId")
-    private Collection<Cart> carts;
 }
+

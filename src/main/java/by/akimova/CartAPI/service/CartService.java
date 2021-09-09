@@ -1,5 +1,7 @@
 package by.akimova.CartAPI.service;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.ValidationException;
 import by.akimova.CartAPI.model.Cart;
 
 import java.util.List;
@@ -14,13 +16,15 @@ import java.util.UUID;
 public interface CartService {
     List<Cart> getAll();
 
-    Cart getCartById(UUID id);
+    Cart getCartById(UUID id) throws EntityNotFoundException, ValidationException;
 
-    Cart deleteFromCart(UUID id, Cart cart);
+    Cart getCartByUserId(UUID userId) throws EntityNotFoundException, ValidationException;
+
+    Cart deleteFromCart(UUID id, List<UUID> itemIds) throws EntityNotFoundException, ValidationException;
 
     Cart saveCart(Cart cart);
 
-    Cart updateCart(UUID id, Cart cart);
+    Cart updateCart(UUID id, Cart cart) throws EntityNotFoundException, ValidationException;
 
     void deleteCartById(UUID id);
 }
