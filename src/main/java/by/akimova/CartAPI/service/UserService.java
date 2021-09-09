@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.service;
 
+import by.akimova.CartAPI.exception.NotFoundEntityException;
 import by.akimova.CartAPI.model.User;
 
 import java.util.List;
@@ -16,11 +17,11 @@ public interface UserService {
 
     User saveUser(User user);
 
-    User getById(UUID id);
+    User getById(UUID id) throws NotFoundEntityException;
 
     List<User> getAllUsers();
 
-    User updateUser(UUID id, User user);
+    User updateUser(UUID id, User user) throws NotFoundEntityException;
 
     void deleteUserById(UUID id);
 

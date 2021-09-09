@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.service.impl;
 
+import by.akimova.CartAPI.exception.NotFoundEntityException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
@@ -43,13 +44,17 @@ public class UserServiceImpl implements UserService {
      * @return found user.
      */
     @Override
-    public User getById(UUID userId) {
+    public User getById(UUID userId) throws NotFoundEntityException {
+        if (userId == null) {
+            log.error("IN getById - userId is null ");
+            throw new IllegalStateException("userId is null");
+        }
         User user = userRepository.findUserByUserId(userId);
         if (user == null) {
-            log.error("IN findById - user is null");
-            throw new NullPointerException("user is null");
+            log.error("IN getById -  no user found by id {}", userId);
+            throw new NotFoundEntityException("user not found");
         }
-        log.info("IN findById - user: {} found by id: {}", user, userId);
+        log.info("IN getById - user: {} found by id: {}", user, userId);
         return user;
     }
 
@@ -76,15 +81,15 @@ public class UserServiceImpl implements UserService {
      * @return Updated user.
      */
     @Override
-    public User updateUser(UUID userId, User user) {
+    public User updateUser(UUID userId, User user) throws NotFoundEntityException {
         if (user == null) {
             log.error("IN updateUser - user is null");
-            throw new NullPointerException("user is null");
+            throw new IllegalStateException("user is null");
         }
         User dbUser = userRepository.findUserByUserId(userId);
-        if (user == null) {
-            log.error("IN updateUser - user is null");
-            throw new NullPointerException("user is null");
+        if (dbUser == null) {
+            log.error("IN updateUser - user not found by id {}", userId);
+            throw new NotFoundEntityException("user not found");
         }
         dbUser.setName(user.getName());
         dbUser.setMail(user.getMail());

@@ -19,11 +19,11 @@ public interface CartService {
 
     Cart getCartByUserId(UUID userId) throws NotFoundEntityException;
 
-    Cart deleteFromCart(UUID id, List<UUID> itemIds);
+    Cart deleteFromCart(UUID id, List<UUID> itemIds) throws NotFoundEntityException;
 
     Cart saveCart(Cart cart);
 
-    Cart updateCart(UUID id, Cart cart);
+    Cart updateCart(UUID id, Cart cart) throws NotFoundEntityException;
 
     void deleteCartById(UUID id);
 }

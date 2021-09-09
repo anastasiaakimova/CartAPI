@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.controller;
 
+import by.akimova.CartAPI.exception.NotFoundEntityException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.service.CartService;
 import lombok.AllArgsConstructor;
@@ -45,11 +46,12 @@ public class CartController {
         Cart cart;
         try {
             cart = cartService.getCartById(id);
-        } catch (NullPointerException e) {
-            log.error("In CartController getCartById - id is null");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
+            log.error("IN CartController getCartById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (NotFoundEntityException e) {
+            log.error("IN CartController getCartById - cart by id {} not found ", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(cart);
     }
@@ -65,8 +67,11 @@ public class CartController {
         Cart cart;
         try {
             cart = cartService.getCartByUserId(id);
-        } catch (NullPointerException e) {
-            log.error("In CartController getCartByUserId - id is null");
+        } catch (IllegalStateException e) {
+            log.error("IN CartController getCartByUserId - id is null");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (NotFoundEntityException e) {
+            log.error("IN CartController getCartByUserId - cart by userId {} not found ", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(cart);
@@ -95,9 +100,12 @@ public class CartController {
         Cart updatedCart;
         try {
             updatedCart = cartService.updateCart(cartId, cart);
-        } catch (NullPointerException e) {
-            log.error("In CartController updateCart - cart by id {} is null", cartId);
+        } catch (IllegalStateException e) {
+            log.error("IN CartController updateCart - cartId is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (NotFoundEntityException e) {
+            log.error("IN CartController updateCart - cart by id {} not found", cartId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(updatedCart, HttpStatus.OK);
     }
@@ -110,13 +118,7 @@ public class CartController {
      */
     @DeleteMapping("/{cartId}")
     public ResponseEntity<?> deleteCart(@PathVariable(value = "cartId") UUID cartId) {
-        try {
-            cartService.deleteCartById(cartId);
-        } catch (NullPointerException e) {
-            log.error("In CartController deleteCart - cart by id {} is not found", cartId);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
+        cartService.deleteCartById(cartId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -128,14 +130,16 @@ public class CartController {
      * @return response status ok and message "updated".
      */
     @DeleteMapping("/{cartId}/items")
-    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID
-                                                    cartId, @RequestBody List<UUID> itemIds) {
+    public ResponseEntity<?> deleteFromCart(@PathVariable(value = "cartId") UUID cartId, @RequestBody List<UUID> itemIds) {
         Cart cart;
         try {
             cart = cartService.deleteFromCart(cartId, itemIds);
-        } catch (NullPointerException e) {
-            log.error("In CartController deleteFromCart - cart by id {} is not found", cartId);
+        } catch (IllegalStateException e) {
+            log.error("IN CartController deleteFromCart - cartId is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (NotFoundEntityException e) {
+            log.error("IN CartController deleteFromCart - cart by id {} is not found", cartId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(cart, HttpStatus.OK);
     }

@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.service;
 
+import by.akimova.CartAPI.exception.NotFoundEntityException;
 import by.akimova.CartAPI.model.Item;
 
 import java.util.List;
@@ -14,11 +15,11 @@ import java.util.UUID;
 public interface ItemService {
     List<Item> getAllItems();
 
-    Item getById(UUID id);
+    Item getById(UUID id) throws NotFoundEntityException;
 
     Item saveItem(Item item);
 
-    Item updateItem(UUID id, Item item);
+    Item updateItem(UUID id, Item item) throws NotFoundEntityException;
 
     void deleteItemById(UUID id);
 }

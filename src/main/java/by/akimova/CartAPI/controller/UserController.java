@@ -1,5 +1,6 @@
 package by.akimova.CartAPI.controller;
 
+import by.akimova.CartAPI.exception.NotFoundEntityException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import lombok.AllArgsConstructor;
@@ -47,8 +48,11 @@ public class UserController {
         User user;
         try {
             user = userService.getById(id);
-        } catch (NullPointerException e) {
-            log.error("In UserController getUserById - id doesn't exist");
+        } catch (IllegalStateException e) {
+            log.error("IN UserController getUserById - id is null");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (NotFoundEntityException e) {
+            log.error("IN UserController getUserById - user by id {} not found", id);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(user, HttpStatus.OK);
@@ -77,9 +81,12 @@ public class UserController {
         User updatedUser;
         try {
             updatedUser = userService.updateUser(id, user);
-        } catch (NullPointerException e) {
-            log.error("In UserController updateUser - user by id {} is null", id);
+        } catch (IllegalStateException e) {
+            log.error("IN UserController updateUser - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (NotFoundEntityException e) {
+            log.error("IN UserController updateUser - user by id {} not found", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
@@ -94,11 +101,10 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable(value = "id") UUID id) {
         try {
             userService.deleteUserById(id);
-        }catch (NullPointerException e) {
-            log.error("In UserController deleteUser - cart by id {} is not found", id);
+        } catch (IllegalStateException e) {
+            log.error("IN UserController deleteUser - user by id {} is not found", id);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
 }
