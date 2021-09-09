@@ -1,17 +1,13 @@
 package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
-import by.akimova.CartAPI.model.Cart;
-import by.akimova.CartAPI.model.Item;
+import by.akimova.CartAPI.exception.NotFreeUsernameException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.User;
-import by.akimova.CartAPI.repository.CartRepository;
-import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,10 +52,10 @@ public class UserServiceImpl implements UserService {
      * @return found user.
      */
     @Override
-    public User getById(UUID userId) throws EntityNotFoundException, ValidationException {
+    public User getById(UUID userId) throws EntityNotFoundException, NotValidUsernameException {
         if (userId == null) {
             log.error("IN getById - userId is null ");
-            throw new ValidationException("userId is null");
+            throw new NotValidUsernameException("userId is null");
         }
         User user = userRepository.findUserByUserId(userId);
         if (user == null) {
@@ -69,6 +65,7 @@ public class UserServiceImpl implements UserService {
         log.info("IN getById - user: {} found by id: {}", user, userId);
         return user;
     }
+
     /**
      * The method add new user.
      *
@@ -77,8 +74,13 @@ public class UserServiceImpl implements UserService {
      */
 
     @Override
-    public User saveUser(User user) {
-        user.setUserId(UUID.randomUUID());
+    public User saveUser(User user) throws NotFreeUsernameException {
+
+        Optional mail = userRepository.findByMail(user.getMail());
+        if (user.getMail().equals(mail)){
+            throw new NotFreeUsernameException("This username is already taken");
+        }
+            user.setUserId(UUID.randomUUID());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         log.info("IN saveUser - new user with id: {} successfully added", user.getUserId());
         return userRepository.save(user);
@@ -105,10 +107,10 @@ public class UserServiceImpl implements UserService {
      * @return Updated user.
      */
     @Override
-    public User updateUser(UUID userId, User user) throws EntityNotFoundException, ValidationException {
+    public User updateUser(UUID userId, User user) throws EntityNotFoundException, NotValidUsernameException {
         if (user == null) {
             log.error("IN updateUser - user is null");
-            throw new ValidationException("user is null");
+            throw new NotValidUsernameException("user is null");
         }
         User dbUser = userRepository.findUserByUserId(userId);
         if (dbUser == null) {
