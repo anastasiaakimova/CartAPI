@@ -4,6 +4,7 @@ import by.akimova.CartAPI.dto.AuthenticationRequest;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.security.jwt.JwtTokenProvider;
 import by.akimova.CartAPI.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,18 +25,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@AllArgsConstructor
 public class AuthenticationRestController {
 
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    public AuthenticationRestController(AuthenticationManager authenticationManager, UserService userService, JwtTokenProvider jwtTokenProvider) {
-        this.authenticationManager = authenticationManager;
-        this.userService = userService;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
 
     /**
      * This method for authentication login request.

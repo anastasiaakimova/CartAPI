@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.security.jwt;
 
 import by.akimova.CartAPI.model.User;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class SecurityUser implements UserDetails {
 
     private final String username;
@@ -19,16 +21,6 @@ public class SecurityUser implements UserDetails {
     private final boolean isAccountNonExpired;
     private final boolean isAccountNonLocked;
     private final boolean isCredentialsNonExpired;
-
-    public SecurityUser(String username, String password, List<SimpleGrantedAuthority> authorities, boolean isActive, boolean isAccountNonExpired, boolean isAccountNonLocked, boolean isCredentialsNonExpired) {
-        this.username = username;
-        this.password = password;
-        this.authorities = authorities;
-        this.isEnabled = isActive;
-        this.isAccountNonExpired = isAccountNonExpired;
-        this.isAccountNonLocked = isAccountNonLocked;
-        this.isCredentialsNonExpired = isCredentialsNonExpired;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

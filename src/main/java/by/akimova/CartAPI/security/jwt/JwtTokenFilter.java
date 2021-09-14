@@ -20,6 +20,7 @@ import java.io.IOException;
  * @version 1.0
  */
 @Component
+
 public class JwtTokenFilter extends GenericFilterBean {
     private final JwtTokenProvider jwtTokenProvider;
 

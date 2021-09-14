@@ -1,5 +1,6 @@
 package by.akimova.CartAPI;
 
+import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,25 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.containsString;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.*;
-
-import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class CartApiApplicationTests {
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -37,15 +37,15 @@ class CartApiApplicationTests {
     void contextLoads() {
     }
 
- //   @Test
+/*       @Test
     public void postUser() throws Exception {
         User user = new User();
 
         user.setUserId(UUID.randomUUID());
-        user.setRole("USER");
-        user.setPassword("user");
-        user.setName("Misha");
-        user.setMail("mishaGHJ@mail.com");
+        user.setRole(Role.USER);
+        user.setPassword(passwordEncoder.encode("user"));
+        user.setName("qwerty");
+        user.setMail("qwerty@mail.com");
         mockMvc.perform(
                         post("/users")
                                 .content(objectMapper.writeValueAsString(user))
@@ -58,14 +58,14 @@ class CartApiApplicationTests {
                 .andExpect(jsonPath("$.password").isNotEmpty())
                 .andExpect(jsonPath("$.name").value("Misha"))
                 .andExpect(jsonPath("$.mail").value("mishaGHJ@mail.com"));
-    }
+    }*/
 
-  //  @Test
+/*      @Test
     public void findById() throws Exception {
         User user = new User();
         user.setUserId(UUID.randomUUID());
-        user.setRole("USER");
-        user.setPassword("user");
+        user.setRole(Role.USER);
+        user.setPassword(passwordEncoder.encode("user"));
         user.setName("Misha");
         user.setMail("mishaGHJ@mail.com");
 
@@ -80,5 +80,5 @@ class CartApiApplicationTests {
                 .andExpect(jsonPath("$.password", is(user.getPassword())))
                 .andExpect(jsonPath("$.name", is("Misha")))
                 .andExpect(jsonPath("$.mail", is("mishaGHJ@mail.com")));
-    }
+    }*/
 }
