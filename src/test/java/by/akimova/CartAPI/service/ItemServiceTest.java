@@ -1,8 +1,9 @@
-package by.akimova.CartAPI.service.impl;
+package by.akimova.CartAPI.service;
 
 import by.akimova.CartAPI.controller.ItemController;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
+import by.akimova.CartAPI.service.impl.ItemServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-class ItemServiceImplTest {
+class ItemServiceTest {
     @Autowired
     private ItemServiceImpl itemServiceImpl;
     @Autowired
