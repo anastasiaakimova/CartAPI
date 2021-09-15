@@ -1,24 +1,17 @@
 package by.akimova.CartAPI.service;
 
-import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
-import by.akimova.CartAPI.service.UserService;
 import by.akimova.CartAPI.service.impl.UserServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,28 +21,25 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testing class for {@link UserService}
+ *
+ * @author anastasiyaakimava
+ * @version 1.0
+ */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    @Autowired
-    private ObjectMapper objectMapper;
-    /*    @Autowired
-        private UserService userService;*/
-    @Autowired
-    private MockMvc mockMvc;
-
     @Mock
     private UserRepository userRepository;
 
-    @Autowired
     @InjectMocks
     private UserServiceImpl userServiceImpl;
-    UserService userService;
+
     private User user1;
     private User user2;
-    List<User> users;
+    private List<User> users;
 
     @BeforeEach
     public void setUp() {
@@ -96,42 +86,17 @@ class UserServiceTest {
 
     @Test
     void saveUser() throws Exception {
-       when(userRepository.save(ArgumentMatchers.any(User.class))).thenReturn(user1);
-        userServiceImpl.saveUser(user1);
-        // verify(userRepository,times(1)).save(any(User.class));
-        // assertThat(user1.getUserId()).isSameAs(user1.getUserId());
+        when(userRepository.save(any(User.class))).thenReturn(user1);
+        User savedUser = userRepository.save(user1);
+        assertThat(savedUser.getMail()).isNotNull();
+        assertThat(savedUser.getUserId()).isSameAs(user1.getUserId());
         verify(userRepository, times(1)).save(user1);
-
-
-        //   assertThat(user).isNotNull();
-        //  verify(userRepository).save(any(User.class));
-/*
-        given(userRepository.save(user1)).willReturn(user1);
-
-        User savedUser = userServiceImpl.saveUser(user1);
-
-        assertThat(savedUser).isNotNull();
-        verify(userRepository).save(any(User.class));*/
     }
 
     @Test
     void findByMail() throws Exception {
         when(userRepository.findByMail(user1.getMail())).thenReturn(java.util.Optional.of(user1));
         assertThat(userServiceImpl.findByMail((user1.getMail()))).isEqualTo(Optional.of(user1));
-    }
-
-    @Test
-    void updateUser() throws Exception {
-        when(userRepository.save(user1)).thenReturn(user1);
-        userServiceImpl.saveUser(user1);
-
-        user1 = user2;
-
-        when(userRepository.save(user1)).thenReturn(user1);
-        assertThat(userServiceImpl.updateUser(user1.getUserId(), user2)).isEqualTo(user1);
-  /*      User updatedUser = userServiceImpl.updateUser(user1.getUserId(), user2);
-        assertThat(updatedUser).isNotNull();
-        verify(userRepository).save(any(User.class));*/
     }
 
     @Test
