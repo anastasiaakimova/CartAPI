@@ -2,6 +2,7 @@ package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
 import by.akimova.CartAPI.exception.NotValidUsernameException;
+import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,11 +43,16 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private  BCryptPasswordEncoder bCryptPasswordEncoder;
+
+
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
     private User user1;
     private User user2;
+    private User userToSave;
     private List<User> users;
 
     @BeforeEach
@@ -69,6 +76,10 @@ class UserServiceImplTest {
         user2.setPassword("admin");
 
         users.add(user2);
+
+        userToSave = new User();
+        userToSave.setMail("qwerty@mail.com");
+        userToSave.setPassword(bCryptPasswordEncoder.encode("user"));
     }
 
     @AfterEach
@@ -101,11 +112,20 @@ class UserServiceImplTest {
 
     @Test
     void saveUser() throws Exception {
-        when(userRepository.save(any(User.class))).thenReturn(user1);
-        User savedUser = userRepository.save(user1);
+        when(userRepository.save(any(User.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        User savedUser = userServiceImpl.saveUser(userToSave);
         assertThat(savedUser.getMail()).isNotNull();
-        assertThat(savedUser.getUserId()).isSameAs(user1.getUserId());
-        verify(userRepository, times(1)).save(user1);
+        assertThat(savedUser.getUserId()).isSameAs(userToSave.getUserId());
+        verify(userRepository, times(1)).save(userToSave);
+    }
+    @Test
+    void updateUser()throws Exception{
+        when(userRepository.findUserByUserId(user1.getUserId())).thenReturn(user1);
+        User user = userServiceImpl.getById((user1.getUserId()));
+        when(userRepository.save(any(User.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        User updatedUser = userServiceImpl.updateUser(user.getUserId(), userToSave);
+        assertThat(updatedUser.getMail()).isEqualTo(userToSave.getMail());
+
     }
 
     @Test
