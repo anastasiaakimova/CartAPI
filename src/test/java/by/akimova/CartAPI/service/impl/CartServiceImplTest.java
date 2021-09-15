@@ -143,7 +143,7 @@ public class CartServiceImplTest {
     }
 
     @Test
-    void deleteCart() throws NotAccessException, EntityNotFoundException {
+    void deleteCartById() throws NotAccessException, EntityNotFoundException {
         when(contextHolder.getContext()).thenReturn(context);
         when(context.getAuthentication()).thenReturn(auth);
         when(auth.getPrincipal()).thenReturn(principal);
