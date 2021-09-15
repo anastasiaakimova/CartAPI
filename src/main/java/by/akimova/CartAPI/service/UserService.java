@@ -27,6 +27,6 @@ public interface UserService {
 
     void deleteUserById(UUID id);
 
-    Optional<User> findByMail(String mail);
+    Optional<User> findByMail(String mail) throws EntityNotFoundException;
 
 }

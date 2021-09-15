@@ -93,10 +93,10 @@ public class UserServiceImpl implements UserService {
      * @return found user.
      */
     @Override
-    public Optional<User> findByMail(String mail) {
+    public Optional<User> findByMail(String mail) throws EntityNotFoundException {
         log.info("IN findByMail - user found by mail: {}", mail);
         return Optional.ofNullable(userRepository.findByMail(mail).orElseThrow(() ->
-                new UsernameNotFoundException("User doesn't exists")));
+                new EntityNotFoundException("User doesn't exists")));
     }
 
     /**

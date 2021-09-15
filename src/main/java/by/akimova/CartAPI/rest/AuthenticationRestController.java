@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.rest;
 
 import by.akimova.CartAPI.dto.AuthenticationRequest;
+import by.akimova.CartAPI.exception.EntityNotFoundException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.security.jwt.JwtTokenProvider;
 import by.akimova.CartAPI.service.UserService;
@@ -39,7 +40,7 @@ public class AuthenticationRestController {
      * @return ResponseEntity with mail and token.
      */
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) throws EntityNotFoundException {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getMail(), request.getPassword()));
             User user = userService.findByMail(request.getMail())
