@@ -51,7 +51,7 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void getAllUsers() throws Exception {
+    void getAllUsers_success() throws Exception {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setName("asdfg");
@@ -70,8 +70,29 @@ class UserControllerTest {
     }
 
     @Test
+    void getAllUsers_forbidden() throws Exception {
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/users")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void getUserById() throws Exception {
+    void getUserById_badRequest() throws Exception {
+        User user = new User();
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/users/" + user.getUserId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void getUserById_success() throws Exception {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setName("asdfg");
@@ -86,10 +107,20 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+    @Test
+    void getUserById_forbidden() throws Exception {
+        User user = new User();
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/users/" + user.getUserId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void addUser() throws Exception {
+    void addUser_success() throws Exception {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setName("asdfg");
@@ -108,8 +139,18 @@ class UserControllerTest {
     }
 
     @Test
+    void addUser_Forbidden() throws Exception {
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void getUserByMail() throws Exception {
+    void getUserByMail_success() throws Exception {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setName("asdfg");
@@ -127,7 +168,31 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void updateUser() throws Exception {
+    void getUserByMail_notFound() throws Exception {
+
+        String mail = "asdf@mail.com";
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.get("/users/mail/" + mail)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    void getUserByMail_forbidden() throws Exception {
+
+        String mail = "asdf@mail.com";
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.get("/users/mail/" + mail)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void updateUser_success() throws Exception {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setName("asdfg");
@@ -147,7 +212,31 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void deleteUser() throws Exception {
+    void updateUser_badRequest() throws Exception {
+        User user = new User();
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.put("/users/" + user.getUserId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest());
+    }
+    @Test
+    void updateUser_forbidden() throws Exception {
+        User user = new User();
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.put("/users/" + user.getUserId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(user)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void deleteUser_success() throws Exception {
 
         User user = new User();
         user.setUserId(UUID.randomUUID());
@@ -160,5 +249,15 @@ class UserControllerTest {
                 .perform(MockMvcRequestBuilders.delete("/users/" + user.getUserId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteUser_Forbidden() throws Exception {
+        User user = new User();
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.delete("/users/" + user.getUserId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 }

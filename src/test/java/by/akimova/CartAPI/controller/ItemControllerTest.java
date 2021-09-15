@@ -1,6 +1,7 @@
 package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.model.Item;
+import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.ItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +73,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void getItemById() throws Exception {
+    void getItemById_success() throws Exception {
         when(itemService.getById(item1.getItemId())).thenReturn(item1);
 
         mockMvc
@@ -80,6 +81,16 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getItemById_badRequest() throws Exception {
+        Item item = new Item();
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/items/" + item.getItemId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -93,7 +104,7 @@ class ItemControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void addItem() throws Exception {
+    void addItem_success() throws Exception {
         when(itemService.saveItem(ArgumentMatchers.any(Item.class))).thenReturn(item1);
 
         mockMvc
@@ -106,8 +117,20 @@ class ItemControllerTest {
     }
 
     @Test
+    void addItem_forbidden() throws Exception {
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.post("/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(item1)))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void updateItem() throws Exception {
+    void updateItem_success() throws Exception {
         given(itemService.updateItem(item1.getItemId(), item2)).willReturn(item1);
         mockMvc
                 .perform(MockMvcRequestBuilders.put("/items/" + item1.getItemId())
@@ -121,10 +144,31 @@ class ItemControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void deleteItem() throws Exception {
+    void updateItem_badRequest() throws Exception {
+        Item item = new Item();
+        mockMvc
+                .perform(MockMvcRequestBuilders.put("/items/" + item.getItemId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(item)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void deleteItem_success() throws Exception {
         mockMvc
                 .perform(MockMvcRequestBuilders.delete("/items/" + item1.getItemId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
+    }
+    @Test
+    void deleteItem_forbidden() throws Exception {
+        mockMvc
+                .perform(MockMvcRequestBuilders.delete("/items/" + item1.getItemId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
 }
