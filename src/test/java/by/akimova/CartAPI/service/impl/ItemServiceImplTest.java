@@ -1,7 +1,8 @@
-package by.akimova.CartAPI.service;
+package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.ItemRepository;
+import by.akimova.CartAPI.service.ItemService;
 import by.akimova.CartAPI.service.impl.ItemServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

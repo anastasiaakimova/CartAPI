@@ -4,6 +4,7 @@ import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.CartService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,7 +79,7 @@ class CartControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void getAllCarts() throws Exception{
+    void getAllCarts_success() throws Exception {
         when(cartService.getAll()).thenReturn(carts);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/carts"))
@@ -87,8 +88,16 @@ class CartControllerTest {
     }
 
     @Test
+    void getAllCarts_forbidden() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/carts"))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void getCartById() throws Exception {
+    void getCartById_success() throws Exception {
         when(cartService.getCartById(cart1.getCartId())).thenReturn(cart1);
 
         mockMvc
@@ -100,7 +109,18 @@ class CartControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void updateCart() throws Exception{
+    void getCartById_badRequest() throws Exception {
+        Cart cart = new Cart();
+        mockMvc
+                .perform(MockMvcRequestBuilders.get("/carts/" + cart.getCartId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void updateCart_success() throws Exception {
         given(cartService.updateCart(cart1.getCartId(), cart2)).willReturn(cart1);
         mockMvc
                 .perform(MockMvcRequestBuilders.put("/carts/" + cart1.getCartId())
@@ -113,7 +133,19 @@ class CartControllerTest {
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void deleteCart() throws Exception{
+    void updateCart_badRequest() throws Exception {
+        Cart cart = new Cart();
+        mockMvc
+                .perform(MockMvcRequestBuilders.put("/carts/" + cart.getCartId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void deleteCart_success() throws Exception {
         mockMvc
                 .perform(MockMvcRequestBuilders.delete("/carts/" + cart1.getCartId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -121,7 +153,11 @@ class CartControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "user:write", username = "test")
-    void deleteFromCart() {
+    void deleteCart_forbidden() throws Exception {
+        mockMvc
+                .perform(MockMvcRequestBuilders.delete("/carts/" + cart1.getCartId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
     }
+
 }

@@ -1,8 +1,11 @@
-package by.akimova.CartAPI.service;
+package by.akimova.CartAPI.service.impl;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
+import by.akimova.CartAPI.service.UserService;
 import by.akimova.CartAPI.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -19,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -30,7 +36,8 @@ import static org.mockito.Mockito.*;
  * @version 1.0
  */
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
@@ -79,9 +86,17 @@ class UserServiceTest {
     }
 
     @Test
-    void getById() throws Exception {
+    void getById_success() throws Exception {
         when(userRepository.findUserByUserId(user1.getUserId())).thenReturn(user1);
         assertThat(userServiceImpl.getById((user1.getUserId()))).isEqualTo(user1);
+    }
+
+    @Test
+    void getById_NotValidUsernameException() throws Exception {
+        User user = new User();
+        when(userRepository.findUserByUserId(user.getUserId())).thenReturn(user);
+        assertThatThrownBy(() -> userServiceImpl.getById(null))
+                .isInstanceOf(NotValidUsernameException.class).hasMessage("userId is null");
     }
 
     @Test
@@ -93,6 +108,11 @@ class UserServiceTest {
         verify(userRepository, times(1)).save(user1);
     }
 
+    @Test
+    void findByMail_success() throws Exception {
+        when(userRepository.findByMail(user1.getMail())).thenReturn(java.util.Optional.of(user1));
+        assertThat(userServiceImpl.findByMail((user1.getMail()))).isEqualTo(Optional.of(user1));
+    }
     @Test
     void findByMail() throws Exception {
         when(userRepository.findByMail(user1.getMail())).thenReturn(java.util.Optional.of(user1));

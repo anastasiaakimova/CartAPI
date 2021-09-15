@@ -1,18 +1,28 @@
-package by.akimova.CartAPI.service;
+package by.akimova.CartAPI.service.impl;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.NotAccessException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.CartRepository;
+import by.akimova.CartAPI.security.jwt.SecurityUser;
+import by.akimova.CartAPI.service.CartService;
 import by.akimova.CartAPI.service.impl.CartServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,19 +39,30 @@ import static org.mockito.Mockito.*;
  * @version 1.0
  */
 @ExtendWith(MockitoExtension.class)
-public class CartServiceTest {
+public class CartServiceImplTest {
     @Mock
     private CartRepository cartRepository;
+
+    @Mock
+    private SecurityContextHolder contextHolder;
+
+    @Mock
+    private SecurityContext context;
 
     @InjectMocks
     private CartServiceImpl cartServiceImpl;
 
     private Cart cart1;
     private Cart cart2;
+    private Cart cartToSave;
     private User user1;
     private User user2;
     private List<Cart> carts;
     private List<Item> items;
+
+    @Mock
+    private Authentication auth;
+    private SecurityUser principal;
 
     @BeforeEach
     public void setUp() {
@@ -73,6 +94,17 @@ public class CartServiceTest {
         cart2.setUserId(user2.getUserId());
         cart2.setItems(items);
         carts.add(cart2);
+
+        cartToSave = new Cart();
+        cartToSave.setUserId(user1.getUserId());
+        cartToSave.setItems(items);
+
+        User user = new User();
+  /*      user.setName("asdfg");
+        user.setMail("asdf@gmail.com");
+        user.setPassword("admin");*/
+
+     //   principal = SecurityUser.fromUser(user);
     }
 
     @AfterEach
@@ -103,10 +135,18 @@ public class CartServiceTest {
 
     @Test
     void saveCart() {
-        when(cartRepository.save(any(Cart.class))).thenReturn(cart1);
-        Cart savedCart = cartRepository.save(cart1);
+        when(cartRepository.insert(any(Cart.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        Cart savedCart = cartServiceImpl.saveCart(cartToSave);
         assertThat(savedCart.getCartId()).isNotNull();
-        assertThat(savedCart.getCartId()).isSameAs(cart1.getCartId());
-        verify(cartRepository, times(1)).save(cart1);
+        assertThat(savedCart.getUserId()).isSameAs(cartToSave.getUserId());
+        assertThat(savedCart.getItems()).isSameAs(cartToSave.getItems());
+    }
+
+    @Test
+    void deleteCart() throws NotAccessException, EntityNotFoundException {
+        when(contextHolder.getContext()).thenReturn(context);
+        when(context.getAuthentication()).thenReturn(auth);
+        when(auth.getPrincipal()).thenReturn(principal);
+        cartServiceImpl.deleteCartById(cart1.getCartId());
     }
 }
