@@ -105,7 +105,6 @@ class ItemControllerTest {
                 .andExpect(status().isCreated());
     }
 
-
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
     void updateItem() throws Exception {
@@ -127,6 +126,5 @@ class ItemControllerTest {
                 .perform(MockMvcRequestBuilders.delete("/items/" + item1.getItemId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-
     }
 }

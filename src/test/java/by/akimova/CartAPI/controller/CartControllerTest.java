@@ -4,6 +4,7 @@ import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.CartService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -48,6 +49,7 @@ class CartControllerTest {
     private Cart cart2;
     private List<Cart> carts;
     private List<Item> items;
+
     @BeforeEach
     public void setUp() {
         carts = new ArrayList<>();
@@ -66,6 +68,12 @@ class CartControllerTest {
         cart2.setItems(items);
 
         carts.add(cart2);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        cart1 = cart2 = null;
+        carts = null;
     }
 
     @Test
@@ -88,16 +96,6 @@ class CartControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(authorities = "user:write", username = "test")
-    void getCartByUserId() {
-    }
-
-    @Test
-    @WithMockUser(authorities = "user:write", username = "test")
-    void addCart() {
     }
 
     @Test
