@@ -33,7 +33,7 @@ import static org.mockito.Mockito.*;
  * @version 1.0
  */
 @ExtendWith(MockitoExtension.class)
-class ItemServiceTest {
+class ItemServiceImplTest {
     @Mock
     private ItemRepository itemRepository;
 
@@ -42,6 +42,7 @@ class ItemServiceTest {
 
     private Item item1;
     private Item item2;
+    private Item itemToSave;
     private List<Item> items;
 
     @BeforeEach
@@ -63,6 +64,12 @@ class ItemServiceTest {
         item2.setBrand("qwerty");
         item2.setYear("2013");
         items.add(item2);
+
+        itemToSave = new Item();
+        itemToSave.setName("tv");
+        itemToSave.setModel("120");
+        itemToSave.setYear("2020");
+        itemToSave.setBrand("lg");
     }
 
     @AfterEach
@@ -82,16 +89,27 @@ class ItemServiceTest {
     @Test
     void getById() throws Exception {
         when(itemRepository.findItemByItemId(item1.getItemId())).thenReturn(item1);
-        assertThat(itemServiceImpl.getById((item1.getItemId()))).isEqualTo(item1);
+        Item item = itemServiceImpl.getById((item1.getItemId()));
+        assertThat(item.getItemId()).isEqualTo(item1.getItemId());
+        verify(itemRepository, times(1)).findItemByItemId(item1.getItemId());
     }
 
     @Test
     void saveItem() throws Exception {
-        when(itemRepository.save(any(Item.class))).thenReturn(item1);
-        Item savedItem = itemRepository.save(item1);
+        when(itemRepository.insert(any(Item.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        Item savedItem = itemServiceImpl.saveItem(itemToSave);
         assertThat(savedItem.getItemId()).isNotNull();
-        assertThat(savedItem.getItemId()).isSameAs(item1.getItemId());
-        verify(itemRepository, times(1)).save(item1);
+        assertThat(savedItem.getItemId()).isSameAs(itemToSave.getItemId());
+        verify(itemRepository, times(1)).insert(itemToSave);
+    }
+
+    @Test
+    void updateItem() throws Exception{
+        when(itemRepository.findItemByItemId(item1.getItemId())).thenReturn(item1);
+        Item item = itemServiceImpl.getById((item1.getItemId()));
+        when(itemRepository.save(any(Item.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        Item updatedItem = itemServiceImpl.updateItem(item.getItemId(), itemToSave);
+        assertThat(updatedItem.getName()).isEqualTo(itemToSave.getName());
     }
 
     @Test
@@ -99,4 +117,6 @@ class ItemServiceTest {
         itemServiceImpl.deleteItemById(item1.getItemId());
         verify(itemRepository, times(1)).deleteItemByItemId(item1.getItemId());
     }
+
+
 }
