@@ -2,6 +2,7 @@ package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
 import by.akimova.CartAPI.exception.NotAccessException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Cart;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.model.Role;
@@ -9,26 +10,29 @@ import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.CartRepository;
 import by.akimova.CartAPI.security.jwt.SecurityUser;
 import by.akimova.CartAPI.service.CartService;
-import by.akimova.CartAPI.service.impl.CartServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -39,6 +43,7 @@ import static org.mockito.Mockito.*;
  * @version 1.0
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CartServiceImplTest {
     @Mock
     private CartRepository cartRepository;
@@ -48,6 +53,12 @@ public class CartServiceImplTest {
 
     @Mock
     private SecurityContext context;
+
+    @Mock
+    private Authentication authentication = Mockito.mock(Authentication.class);
+
+    @Mock
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @InjectMocks
     private CartServiceImpl cartServiceImpl;
@@ -66,6 +77,12 @@ public class CartServiceImplTest {
 
     @BeforeEach
     public void setUp() {
+
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
         carts = new ArrayList<>();
         items = new ArrayList<>();
 
@@ -100,11 +117,14 @@ public class CartServiceImplTest {
         cartToSave.setItems(items);
 
         User user = new User();
-  /*      user.setName("asdfg");
+        user.setName("asdfg");
         user.setMail("asdf@gmail.com");
-        user.setPassword("admin");*/
+        user.setPassword(bCryptPasswordEncoder.encode("admin"));
+        user.setRole(Role.USER);
 
-     //   principal = SecurityUser.fromUser(user);
+     //      principal = SecurityUser.fromUser();
+
+
     }
 
     @AfterEach
@@ -122,15 +142,48 @@ public class CartServiceImplTest {
     }
 
     @Test
-    void getCartById() throws Exception {
+    void getCartById_success() throws Exception {
         when(cartRepository.findCartByCartId(cart1.getCartId())).thenReturn(cart1);
         assertThat(cartServiceImpl.getCartById((cart1.getCartId()))).isEqualTo(cart1);
     }
 
     @Test
-    void getCartByUserId() throws Exception {
+    void getCartById_NotValidUsernameException() throws Exception {
+        Cart cart = new Cart();
+        when(cartRepository.findCartByCartId(cart.getCartId())).thenReturn(cart);
+        assertThatThrownBy(() -> cartServiceImpl.getCartById(null))
+                .isInstanceOf(NotValidUsernameException.class).hasMessage("cartId is null");
+    }
+
+    @Test
+    void getCartById_EntityNotFoundException() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(cartRepository.findCartByCartId(id)).thenReturn(null);
+
+        assertThatThrownBy(() -> cartServiceImpl.getCartById(id))
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Cart not found");
+    }
+
+    @Test
+    void getCartByUserId_success() throws Exception {
         when(cartRepository.findCartByUserId(cart1.getUserId())).thenReturn(cart1);
         assertThat(cartServiceImpl.getCartByUserId((cart1.getUserId()))).isEqualTo(cart1);
+    }
+
+    @Test
+    void getCartByUserId_NotValidUsernameException() throws Exception {
+        Cart cart = new Cart();
+        when(cartRepository.findCartByUserId(cart.getUserId())).thenReturn(cart);
+        assertThatThrownBy(() -> cartServiceImpl.getCartByUserId((null)))
+                .isInstanceOf(NotValidUsernameException.class).hasMessage("cartId is null ");
+    }
+
+    @Test
+    void getCartByUserId_EntityNotFoundException() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(cartRepository.findCartByUserId(id)).thenReturn(null);
+        assertThatThrownBy(() -> cartServiceImpl.getCartByUserId((id)))
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Cart doesn't exist ");
     }
 
     @Test
@@ -147,6 +200,9 @@ public class CartServiceImplTest {
         when(contextHolder.getContext()).thenReturn(context);
         when(context.getAuthentication()).thenReturn(auth);
         when(auth.getPrincipal()).thenReturn(principal);
+        //when(cartRepository.deleteByCartId(cart1.getCartId()))
+          //      .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
         cartServiceImpl.deleteCartById(cart1.getCartId());
+      //  assertThat(cartServiceImpl.deleteCartById(cart1.getCartId()));
     }
 }
