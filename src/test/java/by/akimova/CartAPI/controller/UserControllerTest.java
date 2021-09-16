@@ -1,9 +1,15 @@
 package by.akimova.CartAPI.controller;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.NotFreeUsernameException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -18,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +56,40 @@ class UserControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    private User user1;
+    private User user2;
+    private User userToSave;
+    private List<User> users;
+
+
+    @BeforeEach
+    public void setUp() {
+        users = new ArrayList<>();
+
+        user1 = new User();
+        user1.setUserId(UUID.randomUUID());
+        user1.setName("Alex");
+        user1.setMail("asd@mail");
+        user1.setRole(Role.USER);
+        user1.setPassword("user");
+
+        users.add(user1);
+
+        user2 = new User();
+        user2.setUserId(UUID.randomUUID());
+        user2.setName("Qwerty");
+        user2.setMail("zxcvb@mail");
+        user2.setRole(Role.ADMIN);
+        user2.setPassword("admin");
+
+        users.add(user2);
+
+        userToSave = new User();
+        userToSave.setMail("qwerty@mail.com");
+        userToSave.setPassword(bCryptPasswordEncoder.encode("user"));
+
+    }
+
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
     void getAllUsers_success() throws Exception {
@@ -70,21 +111,15 @@ class UserControllerTest {
     }
 
     @Test
-    void getAllUsers_forbidden() throws Exception {
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/users")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     @WithMockUser(authorities = "user:write", username = "test")
     void getUserById_badRequest() throws Exception {
         User user = new User();
+        UUID uuid = UUID.randomUUID();
 
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/users/" + user.getUserId())
+        when(userService.getById(uuid)).thenReturn(null);
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.get("/users/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -107,16 +142,6 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
-    @Test
-    void getUserById_forbidden() throws Exception {
-        User user = new User();
-
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/users/" + user.getUserId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-    }
-
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
@@ -139,13 +164,23 @@ class UserControllerTest {
     }
 
     @Test
-    void addUser_Forbidden() throws Exception {
+    @WithMockUser(authorities = "user:write", username = "test")
+    void addUser_NotFreeUsernameException() throws Exception {
+        User user = new User();
+        user.setUserId(UUID.randomUUID());
+        user.setName("asdfg");
+        user.setMail("asd@mail");
+        user.setRole(Role.USER);
+        user.setPassword(bCryptPasswordEncoder.encode("user"));
+/*
+        when(userService.saveUser(ArgumentMatchers.any(User.class))).thenThrow(NotFreeUsernameException.class);*/
         this.mockMvc
                 .perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isForbidden());
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
     }
 
     @Test
@@ -177,17 +212,6 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound());
-    }
-    @Test
-    void getUserByMail_forbidden() throws Exception {
-
-        String mail = "asdf@mail.com";
-
-        mockMvc
-                .perform(MockMvcRequestBuilders.get("/users/mail/" + mail)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -222,6 +246,7 @@ class UserControllerTest {
                         .content(this.objectMapper.writeValueAsString(user)))
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void updateUser_forbidden() throws Exception {
         User user = new User();
