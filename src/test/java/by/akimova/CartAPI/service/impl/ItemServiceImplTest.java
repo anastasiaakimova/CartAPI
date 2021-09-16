@@ -1,5 +1,7 @@
 package by.akimova.CartAPI.service.impl;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.ItemService;
@@ -12,6 +14,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +38,7 @@ import static org.mockito.Mockito.*;
  * @version 1.0
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ItemServiceImplTest {
     @Mock
     private ItemRepository itemRepository;
@@ -43,6 +49,7 @@ class ItemServiceImplTest {
     private Item item1;
     private Item item2;
     private Item itemToSave;
+    private Item nullItem;
     private List<Item> items;
 
     @BeforeEach
@@ -70,6 +77,8 @@ class ItemServiceImplTest {
         itemToSave.setModel("120");
         itemToSave.setYear("2020");
         itemToSave.setBrand("lg");
+
+        nullItem = new Item();
     }
 
     @AfterEach
@@ -87,11 +96,27 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void getById() throws Exception {
+    void getById_success() throws Exception {
         when(itemRepository.findItemByItemId(item1.getItemId())).thenReturn(item1);
         Item item = itemServiceImpl.getById((item1.getItemId()));
         assertThat(item.getItemId()).isEqualTo(item1.getItemId());
         verify(itemRepository, times(1)).findItemByItemId(item1.getItemId());
+    }
+
+    @Test
+    void getById_NotValidUsernameException() throws Exception {
+        Item item = new Item();
+        when(itemRepository.findItemByItemId(item.getItemId())).thenReturn(item);
+        assertThatThrownBy(() -> itemServiceImpl.getById(null))
+                .isInstanceOf(NotValidUsernameException.class).hasMessage("itemId is null");
+    }
+
+    @Test
+    void getById_EntityNotFoundException() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        when(itemRepository.findItemByItemId(uuid)).thenReturn(null);
+        assertThatThrownBy(() -> itemServiceImpl.getById(uuid))
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("Item not found");
     }
 
     @Test
@@ -104,12 +129,27 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem() throws Exception{
+    void updateItem_success() throws Exception{
         when(itemRepository.findItemByItemId(item1.getItemId())).thenReturn(item1);
         Item item = itemServiceImpl.getById((item1.getItemId()));
         when(itemRepository.save(any(Item.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
         Item updatedItem = itemServiceImpl.updateItem(item.getItemId(), itemToSave);
         assertThat(updatedItem.getName()).isEqualTo(itemToSave.getName());
+    }
+
+    @Test
+    void updateItem_NotValidUsernameException() throws Exception{
+        when(itemRepository.save(any(Item.class))).thenReturn(null);
+        assertThatThrownBy(() ->itemServiceImpl.updateItem(item1.getItemId(), null))
+                .isInstanceOf(NotValidUsernameException.class).hasMessage("item is null");
+    }
+
+    @Test
+    void updateItem_EntityNotFoundException() throws Exception{
+        UUID uuid = UUID.randomUUID();
+        when(itemRepository.save(any(Item.class))).thenReturn(null);
+        assertThatThrownBy(() ->itemServiceImpl.updateItem(uuid, item1))
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("item is null");
     }
 
     @Test
