@@ -8,7 +8,6 @@ import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -76,8 +75,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User saveUser(User user) throws NotFreeUsernameException {
 
-        Optional mail = userRepository.findByMail(user.getMail());
-        if (user.getMail().equals(mail)){
+        Optional mailUser = userRepository.findByMail(user.getMail());
+        if (mailUser.isPresent()){
             throw new NotFreeUsernameException("This username is already taken");
         }
             user.setUserId(UUID.randomUUID());
@@ -94,9 +93,13 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Optional<User> findByMail(String mail) throws EntityNotFoundException {
+            Optional<User> user = userRepository.findByMail(mail);
+        if (!user.isPresent()){
+            log.error("IN findByMail - user not found by mail: {}", mail);
+            throw new EntityNotFoundException("User doesn't exists");
+        }
         log.info("IN findByMail - user found by mail: {}", mail);
-        return Optional.ofNullable(userRepository.findByMail(mail).orElseThrow(() ->
-                new EntityNotFoundException("User doesn't exists")));
+        return user;
     }
 
     /**
@@ -120,6 +123,7 @@ public class UserServiceImpl implements UserService {
         dbUser.setName(user.getName());
         dbUser.setMail(user.getMail());
         dbUser.setPassword(passwordEncoder.encode(user.getPassword()));
+
 
         dbUser.setRole(user.getRole());
 
