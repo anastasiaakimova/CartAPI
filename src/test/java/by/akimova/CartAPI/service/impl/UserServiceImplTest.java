@@ -1,13 +1,12 @@
 package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.NotFreeUsernameException;
 import by.akimova.CartAPI.exception.NotValidUsernameException;
-import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
-import by.akimova.CartAPI.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.ArrayList;
@@ -44,7 +42,7 @@ class UserServiceImplTest {
     private UserRepository userRepository;
 
     @Mock
-    private  BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
     @InjectMocks
@@ -78,8 +76,9 @@ class UserServiceImplTest {
         users.add(user2);
 
         userToSave = new User();
-        userToSave.setMail("qwerty@mail.com");
+        userToSave.setMail("asd@mail");
         userToSave.setPassword(bCryptPasswordEncoder.encode("user"));
+
     }
 
     @AfterEach
@@ -111,15 +110,31 @@ class UserServiceImplTest {
     }
 
     @Test
-    void saveUser() throws Exception {
+    void getById_EntityNotFoundException() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        when(userRepository.findUserByUserId(uuid)).thenReturn(null);
+        assertThatThrownBy(() -> userServiceImpl.getById(uuid))
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("user not found");
+    }
+
+    @Test
+    void saveUser_success() throws Exception {
         when(userRepository.save(any(User.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
         User savedUser = userServiceImpl.saveUser(userToSave);
         assertThat(savedUser.getMail()).isNotNull();
         assertThat(savedUser.getUserId()).isSameAs(userToSave.getUserId());
         verify(userRepository, times(1)).save(userToSave);
     }
+
     @Test
-    void updateUser()throws Exception{
+    void saveUser_NotFreeUsernameException() throws Exception {
+        when(userRepository.findByMail(user1.getMail())).thenReturn(Optional.ofNullable(user1));
+        assertThatThrownBy(() -> userServiceImpl.saveUser(userToSave).getMail().equals(user1.getMail()))
+                .isInstanceOf(NotFreeUsernameException.class).hasMessage("This username is already taken");
+    }
+
+    @Test
+    void updateUser() throws Exception {
         when(userRepository.findUserByUserId(user1.getUserId())).thenReturn(user1);
         User user = userServiceImpl.getById((user1.getUserId()));
         when(userRepository.save(any(User.class))).thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
@@ -133,10 +148,15 @@ class UserServiceImplTest {
         when(userRepository.findByMail(user1.getMail())).thenReturn(java.util.Optional.of(user1));
         assertThat(userServiceImpl.findByMail((user1.getMail()))).isEqualTo(Optional.of(user1));
     }
+
     @Test
-    void findByMail() throws Exception {
-        when(userRepository.findByMail(user1.getMail())).thenReturn(java.util.Optional.of(user1));
-        assertThat(userServiceImpl.findByMail((user1.getMail()))).isEqualTo(Optional.of(user1));
+    void findByMail_EntityNotFoundException() throws Exception {
+        String mail = "ghjnbv@mail";
+
+        when(userRepository.findByMail(mail)).thenReturn(isNull());
+
+        assertThatThrownBy(() -> userServiceImpl.findByMail(mail))
+                .isInstanceOf(EntityNotFoundException.class).hasMessage("User doesn't exists");
     }
 
     @Test
