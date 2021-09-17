@@ -1,5 +1,7 @@
 package by.akimova.CartAPI.controller;
 
+import by.akimova.CartAPI.exception.EntityNotFoundException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.ItemService;
@@ -74,10 +76,13 @@ class ItemControllerTest {
 
     @Test
     void getItemById_success() throws Exception {
-        when(itemService.getById(item1.getItemId())).thenReturn(item1);
+        Item item = new Item();
+        item.setItemId(UUID.randomUUID());
+
+        when(itemService.getById(item.getItemId())).thenReturn(item);
 
         mockMvc
-                .perform(MockMvcRequestBuilders.get("/items/" + item1.getItemId())
+                .perform(MockMvcRequestBuilders.get("/items/" + item.getItemId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -85,12 +90,30 @@ class ItemControllerTest {
 
     @Test
     void getItemById_badRequest() throws Exception {
-        Item item = new Item();
+        UUID uuid = UUID.randomUUID();
+
+        when(itemService.getById(uuid)).thenThrow(new NotValidUsernameException("itemId is null"));
+
         this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/items/" + item.getItemId())
+                .perform(MockMvcRequestBuilders.get("/items/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    void getItemById_notFound() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        when(itemService.getById(uuid)).thenThrow(new EntityNotFoundException("Item not found"));
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/items/" + uuid)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @Test
@@ -116,17 +139,6 @@ class ItemControllerTest {
                 .andExpect(status().isCreated());
     }
 
-    @Test
-    void addItem_forbidden() throws Exception {
-
-        mockMvc
-                .perform(MockMvcRequestBuilders.post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(item1)))
-                .andDo(print())
-                .andExpect(status().isForbidden());
-    }
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
@@ -146,13 +158,33 @@ class ItemControllerTest {
     @WithMockUser(authorities = "user:write", username = "test")
     void updateItem_badRequest() throws Exception {
         Item item = new Item();
+
+        when(itemService.updateItem(item1.getItemId(), item)).thenThrow(new NotValidUsernameException("item is null"));
+
         mockMvc
-                .perform(MockMvcRequestBuilders.put("/items/" + item.getItemId())
+                .perform(MockMvcRequestBuilders.put("/items/" + item1.getItemId())
+                        .content(this.objectMapper.writeValueAsString(item))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(item)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void updateItem_notFound() throws Exception {
+        Item item = new Item();
+
+        when(itemService.updateItem(item1.getItemId(), item)).thenThrow(new EntityNotFoundException("item is null"));
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put("/items/" + item.getItemId())
+                        //.content(this.objectMapper.writeValueAsString(item))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
 
     }
 
@@ -163,12 +195,5 @@ class ItemControllerTest {
                 .perform(MockMvcRequestBuilders.delete("/items/" + item1.getItemId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-    }
-    @Test
-    void deleteItem_forbidden() throws Exception {
-        mockMvc
-                .perform(MockMvcRequestBuilders.delete("/items/" + item1.getItemId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
     }
 }
