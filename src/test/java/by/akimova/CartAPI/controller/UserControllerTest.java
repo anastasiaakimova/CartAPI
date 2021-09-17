@@ -299,13 +299,4 @@ class UserControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    @Test
-    void deleteUser_Forbidden() throws Exception {
-        User user = new User();
-
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.delete("/users/" + user.getUserId())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-    }
 }
