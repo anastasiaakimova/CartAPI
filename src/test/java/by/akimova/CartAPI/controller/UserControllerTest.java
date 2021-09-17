@@ -7,8 +7,6 @@ import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +28,8 @@ import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.data.mongodb.util.BsonUtils.toJson;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -113,16 +112,32 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
     void getUserById_badRequest() throws Exception {
-        User user = new User();
+        UUID uuid = UUID.randomUUID();
+        when(userService.getById(uuid)).thenThrow(new NotValidUsernameException("userId is null"));
+
+        this.mockMvc
+                .perform(MockMvcRequestBuilders.get("/users/" + uuid)
+                        .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    @WithMockUser(authorities = "user:write", username = "test")
+    void getUserById_notFound() throws Exception {
         UUID uuid = UUID.randomUUID();
 
-        when(userService.getById(uuid)).thenReturn(null);
+        when(userService.getById(uuid)).thenThrow(new EntityNotFoundException("user not found"));
 
         mockMvc
                 .perform(MockMvcRequestBuilders.get("/users/" + uuid)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @Test
@@ -149,7 +164,7 @@ class UserControllerTest {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setName("asdfg");
-        user.setMail("asdf@mail.com");
+        user.setMail("qwert@mail.com");
         user.setRole(Role.ADMIN);
         user.setPassword(bCryptPasswordEncoder.encode("admin"));
 
@@ -158,27 +173,27 @@ class UserControllerTest {
         this.mockMvc
                 .perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated());
     }
 
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
-    void addUser_NotFreeUsernameException() throws Exception {
+    void addUser_badRequest() throws Exception {
         User user = new User();
         user.setUserId(UUID.randomUUID());
         user.setName("asdfg");
         user.setMail("asd@mail");
         user.setRole(Role.USER);
-        user.setPassword(bCryptPasswordEncoder.encode("user"));
-/*
-        when(userService.saveUser(ArgumentMatchers.any(User.class))).thenThrow(NotFreeUsernameException.class);*/
-        this.mockMvc
+        user.setPassword("user");
+
+        when(userService.saveUser(ArgumentMatchers.any(User.class))).thenThrow(new NotFreeUsernameException("This username is already taken"));
+
+        mockMvc
                 .perform(MockMvcRequestBuilders.post("/users")
+                        .content(this.objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andReturn();
     }
@@ -222,7 +237,7 @@ class UserControllerTest {
         user.setName("asdfg");
         user.setMail("asdf@mail.com");
         user.setRole(Role.ADMIN);
-        user.setPassword(bCryptPasswordEncoder.encode("admin"));
+        user.setPassword("admin");
 
         given(userService.updateUser(user.getUserId(), user)).willReturn(user);
 
@@ -239,24 +254,32 @@ class UserControllerTest {
     void updateUser_badRequest() throws Exception {
         User user = new User();
 
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.put("/users/" + user.getUserId())
+        when(userService.updateUser(user1.getUserId(), user)).thenThrow(new NotValidUsernameException("user is null"));
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put("/users/" + user1.getUserId())
+                        .content(this.objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest());
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
     }
 
     @Test
-    void updateUser_forbidden() throws Exception {
+    @WithMockUser(authorities = "user:write", username = "test")
+    void updateUser_notFound() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
         User user = new User();
 
-        this.mockMvc
-                .perform(MockMvcRequestBuilders.put("/users/" + user.getUserId())
+        when(userService.updateUser(null, user)).thenThrow(new EntityNotFoundException("user not found"));
+
+        mockMvc
+                .perform(MockMvcRequestBuilders.put("/users/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(user)))
-                .andExpect(status().isForbidden());
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @Test
