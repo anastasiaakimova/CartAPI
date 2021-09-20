@@ -29,8 +29,7 @@ import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.springframework.data.mongodb.util.BsonUtils.toJson;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
