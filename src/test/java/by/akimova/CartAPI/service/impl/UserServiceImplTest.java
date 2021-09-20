@@ -153,7 +153,7 @@ class UserServiceImplTest {
     void findByMail_EntityNotFoundException() throws Exception {
         String mail = "ghjnbv@mail";
 
-        when(userRepository.findByMail(mail)).thenReturn(isNull());
+        when(userRepository.findByMail(mail)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userServiceImpl.findByMail(mail))
                 .isInstanceOf(EntityNotFoundException.class).hasMessage("User doesn't exists");
