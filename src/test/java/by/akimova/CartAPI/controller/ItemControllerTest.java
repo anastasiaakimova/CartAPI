@@ -81,7 +81,6 @@ class ItemControllerTest {
         items = null;
     }
 
-
     @Test
     void getItemById_success() throws Exception {
         when(itemService.getById(item1.getItemId())).thenReturn(item1);

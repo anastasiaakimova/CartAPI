@@ -124,7 +124,7 @@ class UserControllerTest {
         this.mockMvc
                 .perform(MockMvcRequestBuilders.get("/users/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andReturn();
@@ -225,7 +225,6 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
     void getUserByMail_notFound() throws Exception {
-
         String mail = "asdf@mail.com";
 
         mockMvc
@@ -274,8 +273,6 @@ class UserControllerTest {
     @Test
     @WithMockUser(authorities = "user:write", username = "test")
     void updateUser_notFound() throws Exception {
-        UUID uuid = UUID.randomUUID();
-
         User user = new User();
 
         when(userService.updateUser(user1.getUserId(), user)).thenThrow(new EntityNotFoundException("user not found"));
@@ -305,5 +302,4 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
-
 }
