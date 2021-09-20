@@ -278,12 +278,13 @@ class UserControllerTest {
 
         User user = new User();
 
-        when(userService.updateUser(null, user)).thenThrow(new EntityNotFoundException("user not found"));
+        when(userService.updateUser(user1.getUserId(), user)).thenThrow(new EntityNotFoundException("user not found"));
 
         mockMvc
-                .perform(MockMvcRequestBuilders.put("/users/" + uuid)
+                .perform(MockMvcRequestBuilders.put("/users/" + user1.getUserId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(user)))
                 .andExpect(status().isNotFound())
                 .andReturn();
     }

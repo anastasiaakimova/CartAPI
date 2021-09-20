@@ -185,7 +185,9 @@ class ItemControllerTest {
 
         mockMvc
                 .perform(MockMvcRequestBuilders.put("/items/" + item1.getItemId())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(item)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andReturn();
