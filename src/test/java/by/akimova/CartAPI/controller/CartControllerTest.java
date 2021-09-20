@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,26 +56,19 @@ class CartControllerTest {
     private Item item1;
     private Item item2;
     private List<Item> items;
-    private List<UUID> itemsId;
+    private List<UUID> itemIds;
 
     @BeforeEach
     public void setUp() {
-
         item1 = new Item();
         item1.setItemId(UUID.randomUUID());
 
         item2 = new Item();
         item2.setItemId(UUID.randomUUID());
 
-        carts = new ArrayList<>();
         items = new ArrayList<>();
-        itemsId = new ArrayList<>();
-
         items.add(item1);
         items.add(item2);
-
-        itemsId.add(item1.getItemId());
-        itemsId.add(item2.getItemId());
 
         cart1 = new Cart();
         cart1.setCartId(UUID.randomUUID());
@@ -85,16 +80,22 @@ class CartControllerTest {
         cart2.setUserId(UUID.randomUUID());
         cart2.setItems(items);
 
+        carts = new ArrayList<>();
         carts.add(cart1);
         carts.add(cart2);
 
+        itemIds = new ArrayList<>();
+        itemIds.add(item1.getItemId());
 
     }
 
     @AfterEach
     public void tearDown() {
+        item1 = item2 = null;
         cart1 = cart2 = null;
         carts = null;
+        items = null;
+        itemIds = null;
     }
 
     @Test
@@ -125,7 +126,6 @@ class CartControllerTest {
         UUID uuid = UUID.randomUUID();
 
         when(cartService.getCartById(uuid)).thenThrow(new NotValidUsernameException("cartId is null"));
-
 
         mockMvc
                 .perform(MockMvcRequestBuilders.get("/carts/" + uuid)
@@ -158,7 +158,7 @@ class CartControllerTest {
         when(cartService.getCartByUserId(cart1.getUserId())).thenReturn(cart1);
 
         this.mockMvc
-                .perform(MockMvcRequestBuilders.get("/carts/usersId/" + cart1.getUserId())
+                .perform(MockMvcRequestBuilders.get("/carts/userId/" + cart1.getUserId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -171,7 +171,7 @@ class CartControllerTest {
         when(cartService.getCartByUserId(uuid)).thenThrow(new EntityNotFoundException("Cart doesn't exist "));
 
         mockMvc
-                .perform(MockMvcRequestBuilders.get("/carts/usersId/" + uuid)
+                .perform(MockMvcRequestBuilders.get("/carts/userId/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -221,13 +221,14 @@ class CartControllerTest {
     @WithMockUser(authorities = "user:write", username = "test")
     void deleteFromCart_success() throws Exception {
         UUID cartId = cart1.getCartId();
-        when(cartService.deleteFromCart(cartId, itemsId)).thenReturn(cart1);
+
+        when(cartService.deleteFromCart(cart1.getCartId(), itemIds)).thenReturn(cart1);
 
         mockMvc
                 .perform(MockMvcRequestBuilders.delete("/carts/" + cartId + "/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                        .content(this.objectMapper.writeValueAsString(cart1)))
+                          .content(this.objectMapper.writeValueAsString(cart1)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
@@ -238,7 +239,8 @@ class CartControllerTest {
     @WithMockUser(authorities = "user:write", username = "test")
     void deleteFromCart_badRequest() throws Exception {
         UUID cartId = cart1.getCartId();
-        when(cartService.deleteFromCart(cartId, itemsId)).thenThrow(new NotValidUsernameException("cartId is null "));
+
+        when(cartService.deleteFromCart(cartId, itemIds)).thenThrow(new NotValidUsernameException("cartId is null "));
 
         mockMvc
                 .perform(MockMvcRequestBuilders.delete("/carts/" + cartId + "/items")
@@ -265,8 +267,9 @@ class CartControllerTest {
     void deleteCart_notFound() throws Exception {
         UUID uuid = UUID.randomUUID();
 
+        doThrow(new EntityNotFoundException("cart not found")).when(cartService).deleteCartById(isA(UUID.class));
         mockMvc
-                .perform(MockMvcRequestBuilders.delete("/carts/" + "111")
+                .perform(MockMvcRequestBuilders.delete("/carts/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
