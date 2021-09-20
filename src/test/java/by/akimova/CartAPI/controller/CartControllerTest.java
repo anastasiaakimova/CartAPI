@@ -228,7 +228,7 @@ class CartControllerTest {
                 .perform(MockMvcRequestBuilders.delete("/carts/" + cartId + "/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
-                          .content(this.objectMapper.writeValueAsString(cart1)))
+                          .content(this.objectMapper.writeValueAsString(itemIds)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
