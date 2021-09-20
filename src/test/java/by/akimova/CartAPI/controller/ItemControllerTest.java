@@ -6,6 +6,7 @@ import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.ItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -74,15 +75,19 @@ class ItemControllerTest {
         items.add(item2);
     }
 
+    @AfterEach
+    public void tearDown() {
+        item1 = item2 = null;
+        items = null;
+    }
+
+
     @Test
     void getItemById_success() throws Exception {
-        Item item = new Item();
-        item.setItemId(UUID.randomUUID());
-
-        when(itemService.getById(item.getItemId())).thenReturn(item);
+        when(itemService.getById(item1.getItemId())).thenReturn(item1);
 
         mockMvc
-                .perform(MockMvcRequestBuilders.get("/items/" + item.getItemId())
+                .perform(MockMvcRequestBuilders.get("/items/" + item1.getItemId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -179,12 +184,11 @@ class ItemControllerTest {
         when(itemService.updateItem(item1.getItemId(), item)).thenThrow(new EntityNotFoundException("item is null"));
 
         mockMvc
-                .perform(MockMvcRequestBuilders.put("/items/" + item.getItemId())
-                        //.content(this.objectMapper.writeValueAsString(item))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                .perform(MockMvcRequestBuilders.put("/items/" + item1.getItemId())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andReturn();
 
     }
 
