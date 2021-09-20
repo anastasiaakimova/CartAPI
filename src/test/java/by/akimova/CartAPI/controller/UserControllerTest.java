@@ -7,6 +7,7 @@ import by.akimova.CartAPI.model.Role;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -87,6 +88,12 @@ class UserControllerTest {
         userToSave.setMail("qwerty@mail.com");
         userToSave.setPassword(bCryptPasswordEncoder.encode("user"));
 
+    }
+
+    @AfterEach
+    public void tearDown() {
+        user1 = user2 = userToSave = null;
+        users = null;
     }
 
     @Test
