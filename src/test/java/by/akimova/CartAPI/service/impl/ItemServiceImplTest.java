@@ -150,6 +150,4 @@ class ItemServiceImplTest {
         itemServiceImpl.deleteItemById(item1.getItemId());
         verify(itemRepository, times(1)).deleteItemByItemId(item1.getItemId());
     }
-
-
 }
