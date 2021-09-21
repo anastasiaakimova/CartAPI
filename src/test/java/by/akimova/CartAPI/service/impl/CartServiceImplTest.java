@@ -121,10 +121,6 @@ public class CartServiceImplTest {
         user.setMail("asdf@gmail.com");
         user.setPassword(bCryptPasswordEncoder.encode("admin"));
         user.setRole(Role.USER);
-
-     //      principal = SecurityUser.fromUser();
-
-
     }
 
     @AfterEach
@@ -193,16 +189,5 @@ public class CartServiceImplTest {
         assertThat(savedCart.getCartId()).isNotNull();
         assertThat(savedCart.getUserId()).isSameAs(cartToSave.getUserId());
         assertThat(savedCart.getItems()).isSameAs(cartToSave.getItems());
-    }
-
-    //@Test
-    void deleteCartById() throws NotAccessException, EntityNotFoundException {
-        when(contextHolder.getContext()).thenReturn(context);
-        when(context.getAuthentication()).thenReturn(auth);
-        when(auth.getPrincipal()).thenReturn(principal);
-        //when(cartRepository.deleteByCartId(cart1.getCartId()))
-          //      .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
-        cartServiceImpl.deleteCartById(cart1.getCartId());
-      //  assertThat(cartServiceImpl.deleteCartById(cart1.getCartId()));
     }
 }
