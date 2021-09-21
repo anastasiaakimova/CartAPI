@@ -1,8 +1,6 @@
 package by.akimova.CartAPI.security.jwt;
 
-import by.akimova.CartAPI.security.jwt.JwtAuthenticationException;
 import io.jsonwebtoken.*;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +21,7 @@ import java.util.Date;
  * @version 1.0
  */
 @Component
+
 public class JwtTokenProvider {
     private final UserDetailsService userDetailsService;
 
@@ -33,7 +32,7 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long validityInNMilliseconds;
 
-    public JwtTokenProvider(@Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService) {
+    public JwtTokenProvider(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 

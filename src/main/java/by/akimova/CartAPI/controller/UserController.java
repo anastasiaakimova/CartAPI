@@ -93,10 +93,15 @@ public class UserController {
      */
     @GetMapping("mail/{mail}")
     @PreAuthorize("hasAuthority('user:write')")
-    ResponseEntity<?> getUserByMail(@PathVariable(value = "mail") String mail) {
-        User user = userService.findByMail(mail).orElseThrow(
-                () -> new UsernameNotFoundException("User doesn't exists!")
-        );
+    ResponseEntity<?> getUserByMail(@PathVariable(value = "mail") String mail) throws EntityNotFoundException {
+        User user ;
+        try {
+            user   =userService.findByMail(mail).orElseThrow(
+                    () -> new EntityNotFoundException("User doesn't exists!"));
+        } catch (EntityNotFoundException e){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         return ResponseEntity.ok(user);
     }
 
