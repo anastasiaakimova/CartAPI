@@ -73,7 +73,8 @@ db.cart.insertOne({
         {
             "itemId": "73920b26-03f5-11ec-9a03-0242ac130003"
         }
-    ]
+    ],
+    "userId": "d32c3da0-0408-11ec-9a03-0242ac130003"
 
 })
 
@@ -81,6 +82,7 @@ db.cart.insertOne({
 /* Users*/
 
 db.users.createIndex({userId: 1}, {unique: true})
+db.users.createIndex({mail: 1}, {unique: true})
 db.users.getIndexes()
 
 db.users.insertOne({
@@ -88,8 +90,7 @@ db.users.insertOne({
     "name": "Alex",
     "mail": "alexGr@gmail.com",
     "password": "$2a$12$ukH5EN3vizXrqWFTZ1enQuOLljSA5IgVFafiuOe/knVZ8qxoOg5uG",
-    "role": "USER",
-    "cartId": "cb21c184-03fe-11ec-9a03-0242ac130003"
+    "role": "USER"
 })
 //password: user
 

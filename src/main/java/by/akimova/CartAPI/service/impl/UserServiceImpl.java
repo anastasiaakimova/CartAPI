@@ -1,30 +1,37 @@
 package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
+import by.akimova.CartAPI.exception.NotFreeUsernameException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.repository.UserRepository;
 import by.akimova.CartAPI.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
+ * The class is implementation of user's business logic.
  * The class is implementation of  {@link UserService} interface.
  * Wrapper for {@link UserRepository} + business logic.
  *
  * @author anastasiyaakimava
  * @version 1.0
  */
-@AllArgsConstructor
+
 @Service
 @Slf4j
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     /**
      * The method show all users with all information about it.
@@ -45,10 +52,10 @@ public class UserServiceImpl implements UserService {
      * @return found user.
      */
     @Override
-    public User getById(UUID userId) throws EntityNotFoundException, ValidationException {
+    public User getById(UUID userId) throws EntityNotFoundException, NotValidUsernameException {
         if (userId == null) {
             log.error("IN getById - userId is null ");
-            throw new ValidationException("userId is null");
+            throw new NotValidUsernameException("userId is null");
         }
         User user = userRepository.findUserByUserId(userId);
         if (user == null) {
@@ -67,12 +74,30 @@ public class UserServiceImpl implements UserService {
      */
 
     @Override
-    public User saveUser(User user) {
-        user.setUserId(UUID.randomUUID());
+    public User saveUser(User user) throws NotFreeUsernameException {
+
+        Optional mail = userRepository.findByMail(user.getMail());
+        if (user.getMail().equals(mail)){
+            throw new NotFreeUsernameException("This username is already taken");
+        }
+            user.setUserId(UUID.randomUUID());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         log.info("IN saveUser - new user with id: {} successfully added", user.getUserId());
         return userRepository.save(user);
     }
 
+    /**
+     * The method find user by mail and show all information about it.
+     *
+     * @param mail This is user's mail.
+     * @return found user.
+     */
+    @Override
+    public Optional<User> findByMail(String mail) {
+        log.info("IN findByMail - user found by mail: {}", mail);
+        return Optional.ofNullable(userRepository.findByMail(mail).orElseThrow(() ->
+                new UsernameNotFoundException("User doesn't exists")));
+    }
 
     /**
      * This method update user.
@@ -82,10 +107,10 @@ public class UserServiceImpl implements UserService {
      * @return Updated user.
      */
     @Override
-    public User updateUser(UUID userId, User user) throws EntityNotFoundException, ValidationException {
+    public User updateUser(UUID userId, User user) throws EntityNotFoundException, NotValidUsernameException {
         if (user == null) {
             log.error("IN updateUser - user is null");
-            throw new ValidationException("user is null");
+            throw new NotValidUsernameException("user is null");
         }
         User dbUser = userRepository.findUserByUserId(userId);
         if (dbUser == null) {
@@ -94,7 +119,8 @@ public class UserServiceImpl implements UserService {
         }
         dbUser.setName(user.getName());
         dbUser.setMail(user.getMail());
-        dbUser.setPassword(user.getPassword());
+        dbUser.setPassword(passwordEncoder.encode(user.getPassword()));
+
         dbUser.setRole(user.getRole());
 
         log.info("IN updateUser - user with id: {} successfully edited ", userId);
@@ -111,4 +137,5 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteUserByUserId(userId);
         log.info("IN deleteUserById - user with id: {} successfully deleted", userId);
     }
+
 }

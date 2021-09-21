@@ -1,17 +1,22 @@
 package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
+import by.akimova.CartAPI.exception.NotFreeUsernameException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.User;
 import by.akimova.CartAPI.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
 
 /**
  * REST controller user connected requests.
@@ -25,14 +30,17 @@ import java.util.UUID;
 @AllArgsConstructor
 @Slf4j
 public class UserController {
+
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
-     * The method shows all users.
+     * The method shows admin all users.
      *
      * @return ResponseEntity with list of users and status ok.
      */
     @GetMapping
+    @PreAuthorize("hasAuthority('user:write')")
     ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
@@ -40,16 +48,16 @@ public class UserController {
     /**
      * The method shows user by id.
      *
-     * @param id This is user's id which should be viewed.
-     * @return ResponseEntity with body of user and status ok.
+     * @param id This is id of the person to be found.
+     * @return ResponseEntity with found user and status ok.
      */
-
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     ResponseEntity<?> getUserById(@PathVariable(value = "id") UUID id) {
         User user;
         try {
             user = userService.getById(id);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN UserController getUserById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -66,8 +74,30 @@ public class UserController {
      * @return response with body of created user and status ok.
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> addUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
+        User savedUser;
+        try {
+            savedUser = userService.saveUser(user);
+        }catch (NotFreeUsernameException e){
+            return new ResponseEntity<>("This username is already taken ", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    }
+
+    /**
+     * The method shows user by mail.
+     *
+     * @param mail This is mail of the person to be found.
+     * @return ResponseEntity with found user and status ok.
+     */
+    @GetMapping("mail/{mail}")
+    @PreAuthorize("hasAuthority('user:write')")
+    ResponseEntity<?> getUserByMail(@PathVariable(value = "mail") String mail) {
+        User user = userService.findByMail(mail).orElseThrow(
+                () -> new UsernameNotFoundException("User doesn't exists!")
+        );
+        return ResponseEntity.ok(user);
     }
 
     /**
@@ -82,7 +112,7 @@ public class UserController {
         User updatedUser;
         try {
             updatedUser = userService.updateUser(id, user);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN UserController updateUser - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -99,8 +129,10 @@ public class UserController {
      * @return response status no_content.
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> deleteUser(@PathVariable(value = "id") UUID id) {
         userService.deleteUserById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
+

@@ -1,13 +1,14 @@
 package by.akimova.CartAPI.controller;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.service.ItemService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class ItemController {
         Item item;
         try {
             item = itemService.getById(itemId);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN ItemController getItemById - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -64,6 +65,7 @@ public class ItemController {
      * @return response with body of created item and status ok.
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> addItem(@RequestBody Item item) {
         return new ResponseEntity<>(itemService.saveItem(item), HttpStatus.CREATED);
     }
@@ -76,11 +78,12 @@ public class ItemController {
      * @return response with body of updated item and status ok.
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> updateItem(@PathVariable(value = "id") UUID id, @RequestBody Item item) {
         Item updatedItem;
         try {
             updatedItem = itemService.updateItem(id, item);
-        } catch (ValidationException e) {
+        } catch (NotValidUsernameException e) {
             log.error("IN ItemController updateItem - id is null");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (EntityNotFoundException e) {
@@ -97,6 +100,7 @@ public class ItemController {
      * @return response status no_content.
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> deleteItem(@PathVariable(value = "id") UUID id) {
         itemService.deleteItemById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

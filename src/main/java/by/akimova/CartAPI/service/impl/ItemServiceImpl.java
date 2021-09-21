@@ -1,7 +1,7 @@
 package by.akimova.CartAPI.service.impl;
 
 import by.akimova.CartAPI.exception.EntityNotFoundException;
-import by.akimova.CartAPI.exception.ValidationException;
+import by.akimova.CartAPI.exception.NotValidUsernameException;
 import by.akimova.CartAPI.model.Item;
 import by.akimova.CartAPI.repository.ItemRepository;
 import by.akimova.CartAPI.service.ItemService;
@@ -45,10 +45,10 @@ public class ItemServiceImpl implements ItemService {
      * @return found item.
      */
     @Override
-    public Item getById(UUID itemId) throws EntityNotFoundException, ValidationException {
+    public Item getById(UUID itemId) throws EntityNotFoundException, NotValidUsernameException {
         if (itemId == null) {
             log.error("IN getById - id is null ");
-            throw new ValidationException("itemId is null");
+            throw new NotValidUsernameException("itemId is null");
         }
         Item item = itemRepository.findItemByItemId(itemId);
         if (item == null){
@@ -80,10 +80,10 @@ public class ItemServiceImpl implements ItemService {
      * @return Updated item.
      */
     @Override
-    public Item updateItem(UUID itemId, Item item) throws EntityNotFoundException, ValidationException {
+    public Item updateItem(UUID itemId, Item item) throws EntityNotFoundException, NotValidUsernameException {
         if (item == null) {
             log.error("IN updateItem - item is null");
-            throw new ValidationException("item is null");
+            throw new NotValidUsernameException("item is null");
         }
         Item dbItem = itemRepository.findItemByItemId(itemId);
         if (dbItem == null){
